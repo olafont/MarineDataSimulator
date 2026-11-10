@@ -1,0 +1,135 @@
+# Built-in scenario: a 15 m motor vessel crossing the English Channel towards Cherbourg,
+# with a strong semi-diurnal tide (5 m range, 2.5 kn streams).
+name = "Channel crossing (motor, tidal)"
+
+[simulation]
+seed = 7
+
+[vessel]
+name = "SIM MOTOR"
+mmsi = 100000002
+call_sign = "SIM02"
+propulsion = "motor"
+length_m = 15.0
+beam_m = 4.6
+draft_m = 1.4
+max_speed_kn = 18.0
+speed_time_constant_s = 25.0
+roll_period_s = 5.0
+idle_rpm = 650.0
+max_rpm = 2600.0
+
+[initial]
+position = { lat = 50.2500, lon = -1.1000 }
+heading = 210.0
+speed = 14.0
+target_speed = 14.0
+
+[steering]
+mode = "route"
+looped = false
+arrival_radius_m = 150.0
+waypoints = [
+  { lat = 50.1000, lon = -1.2500 },
+  { lat = 49.9000, lon = -1.4000 },
+  { lat = 49.7500, lon = -1.5500 },
+]
+
+[environment]
+wind_speed = 18.0
+wind_direction = 240.0
+seabed_depth = 55.0
+water_temp = 14.0
+air_temp = 15.0
+pressure = 1008.0
+humidity = 80.0
+magnetic_variation = -0.5
+wave_height = 1.5
+wave_period = 6.0
+wave_direction = 250.0
+
+[dynamics]
+pressure_trend_hpa_h = -0.8
+
+[dynamics.wind]
+gust_fraction = 0.15
+gust_period_s = 15.0
+shift_deg = 8.0
+shift_period_s = 240.0
+
+[tide]
+enabled = true
+range_m = 5.0
+period_h = 12.42
+# high_water = "2026-06-21T10:30:00Z"   # omit = high water at simulation start
+flood_set_deg = 75.0
+max_rate_kn = 2.5
+
+# Illustrative shipping (fictitious names and MMSIs): east- and westbound traffic and a
+# cross-Channel ferry. Add `class = "sart"` for a search-and-rescue transmitter.
+[[ais.targets]]
+mmsi = 100200001
+name = "NORTHERN STAR"
+call_sign = "MNS101"
+class = "a"
+position = { lat = 50.0500, lon = -1.9000 }
+motion = { mode = "course", cog = 80.0, sog_kn = 18.0 }
+[ais.targets.static]
+ship_type = 70
+imo = 9200001
+to_bow = 300
+to_stern = 66
+to_port = 25
+to_starboard = 26
+draught_m = 14.5
+destination = "DEHAM"
+
+[[ais.targets]]
+mmsi = 100200002
+name = "SOLENT TRADER"
+call_sign = "MST102"
+class = "a"
+position = { lat = 49.9800, lon = -0.5000 }
+motion = { mode = "course", cog = 258.0, sog_kn = 13.5 }
+[ais.targets.static]
+ship_type = 80
+imo = 9200002
+to_bow = 190
+to_stern = 50
+to_port = 21
+to_starboard = 21
+draught_m = 12.1
+destination = "USHOU"
+
+[[ais.targets]]
+mmsi = 100200003
+name = "COTENTIN EXPRESS"
+call_sign = "FCE103"
+class = "a"
+position = { lat = 49.7000, lon = -1.6200 }
+motion = { mode = "route", sog_kn = 21.0, looped = true, waypoints = [
+  { lat = 50.6800, lon = -1.0800 },
+  { lat = 49.7000, lon = -1.6200 },
+] }
+[ais.targets.static]
+ship_type = 60
+to_bow = 140
+to_stern = 45
+to_port = 15
+to_starboard = 15
+draught_m = 6.4
+destination = "PORTSMOUTH"
+
+[[ais.targets]]
+mmsi = 100200004
+name = "WAVE DANCER"
+call_sign = "MWD104"
+class = "b"
+position = { lat = 50.3000, lon = -1.2500 }
+motion = { mode = "course", cog = 200.0, sog_kn = 6.5 }
+[ais.targets.static]
+ship_type = 36
+to_bow = 9
+to_stern = 3
+to_port = 2
+to_starboard = 2

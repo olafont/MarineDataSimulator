@@ -1,0 +1,201 @@
+# Built-in default scenario: a 12 m cruising yacht sailing a loop 3–5 nm off Cocoa Beach,
+# south of Port Canaveral, in an east-southeasterly breeze.
+# Leg 2 → 3 is nearly upwind, so the autopilot tacks on the laylines.
+# Depths are a uniform illustrative value — NOT for navigation (the Canaveral shoals to the
+# north-east are deliberately kept clear of the route).
+name = "Cape Canaveral sailing loop"
+
+[simulation]
+time_scale = 1.0
+paused = false
+seed = 1
+# start_time = "2026-06-21T14:00:00Z"   # omit to start at wall-clock time
+
+[vessel]
+name = "SIMULATOR"
+mmsi = 100000001
+call_sign = "SIM01"
+propulsion = "sail"          # "sail" or "motor"
+# polar_file = "my-boat.pol" # relative to this file; omit for the built-in cruiser polar
+polar_efficiency = 0.95
+length_m = 12.0
+beam_m = 4.0
+draft_m = 2.0
+max_speed_kn = 8.0
+roll_period_s = 4.5
+
+[initial]
+position = { lat = 28.4000, lon = -80.5500 }
+heading = 200.0
+speed = 6.0
+target_speed = 6.0           # used when motoring
+engine_on = false
+
+[steering]
+mode = "route"               # "heading", "wind_angle" or "route"
+looped = true
+arrival_radius_m = 80.0
+waypoints = [
+  { lat = 28.3700, lon = -80.5600 },
+  { lat = 28.3000, lon = -80.5400 },
+  { lat = 28.2700, lon = -80.5000 },
+  { lat = 28.3400, lon = -80.4900 },
+]
+
+# Base values; the dynamics below add gusts, shifts, tide and the pressure trend.
+[environment]
+wind_speed = 13.0
+wind_direction = 110.0
+current_speed = 0.3
+current_set = 0.0            # weak northerly set inshore of the Gulf Stream
+seabed_depth = 12.0
+water_temp = 25.5
+air_temp = 26.0
+pressure = 1017.0
+humidity = 75.0
+magnetic_variation = -6.5    # west
+wave_height = 1.0
+wave_period = 7.0
+wave_direction = 95.0
+
+[dynamics]
+pressure_trend_hpa_h = 0.0
+
+[dynamics.wind]
+gust_fraction = 0.12
+gust_period_s = 20.0
+shift_deg = 6.0
+shift_period_s = 180.0
+
+[tide]
+enabled = true
+range_m = 1.1                # semi-diurnal Atlantic tide
+period_h = 12.42
+flood_set_deg = 290.0
+max_rate_kn = 0.3
+
+# Overrides change what is reported (channels) or what drives the physics (environment).
+# mode = "replace" | "offset" | "freeze"
+# [overrides.channels]
+# depth = { mode = "replace", value = 2.0 }
+
+# Own ship's AIS transponder (reported as !AIVDO). Defaults: Class B, enabled.
+# [vessel.ais]
+# enabled = true
+# class = "b"                 # "a" or "b"
+# [vessel.ais.static]
+# ship_type = 36              # sailing
+# to_bow = 8
+# to_stern = 4
+# to_port = 2
+# to_starboard = 2
+
+# Other AIS stations (illustrative traffic, fictitious names and MMSIs).
+# class = "a" | "b" | "base_station" | "aton" | "sart"
+# motion: { mode = "course", cog, sog_kn } | { mode = "route", waypoints, sog_kn, looped }
+#         | { mode = "stationary" }
+[[ais.targets]]
+mmsi = 100100001
+name = "SEA ODYSSEY"
+call_sign = "WSO1001"
+class = "a"
+position = { lat = 28.4085, lon = -80.5850 }
+nav_status = 0
+motion = { mode = "route", sog_kn = 14.0, looped = false, waypoints = [
+  { lat = 28.4060, lon = -80.5300 },
+  { lat = 28.3700, lon = -80.4000 },
+  { lat = 28.2000, lon = -80.2500 },
+] }
+[ais.targets.static]
+ship_type = 60                # passenger
+imo = 9100001
+to_bow = 250
+to_stern = 50
+to_port = 18
+to_starboard = 18
+draught_m = 8.5
+destination = "NASSAU"
+eta = "06-22 08:00"
+
+[[ais.targets]]
+mmsi = 100100002
+name = "ATLANTIC TRADER"
+call_sign = "WAT1002"
+class = "a"
+position = { lat = 28.2000, lon = -80.4300 }
+motion = { mode = "course", cog = 355.0, sog_kn = 12.5 }
+[ais.targets.static]
+ship_type = 70                # cargo
+imo = 9100002
+to_bow = 140
+to_stern = 40
+to_port = 14
+to_starboard = 14
+draught_m = 9.2
+destination = "JACKSONVILLE"
+
+[[ais.targets]]
+mmsi = 100100003
+name = "MISS KATHY"
+call_sign = "WMK1003"
+class = "a"
+position = { lat = 28.3300, lon = -80.5200 }
+nav_status = 7                # engaged in fishing
+max_rot_dpm = 120.0
+motion = { mode = "course", cog = 40.0, sog_kn = 3.0 }
+[ais.targets.static]
+ship_type = 30
+to_bow = 15
+to_stern = 7
+to_port = 4
+to_starboard = 4
+
+[[ais.targets]]
+mmsi = 100100004
+name = "SPINDRIFT"
+call_sign = "WSP1004"
+class = "b"
+position = { lat = 28.4300, lon = -80.5100 }
+motion = { mode = "course", cog = 165.0, sog_kn = 6.0 }
+[ais.targets.static]
+ship_type = 36
+vendor_id = "SIMAIS"
+to_bow = 9
+to_stern = 4
+to_port = 2
+to_starboard = 2
+
+[[ais.targets]]
+mmsi = 100100005
+name = "GULF PIONEER"
+call_sign = "WGP1005"
+class = "a"
+position = { lat = 28.4600, lon = -80.4700 }
+nav_status = 1                # at anchor: swings to the wind
+motion = { mode = "stationary" }
+[ais.targets.static]
+ship_type = 80                # tanker
+to_bow = 160
+to_stern = 40
+to_port = 16
+to_starboard = 16
+draught_m = 11.0
+destination = "PORT CANAVERAL"
+
+[[ais.targets]]
+mmsi = 991009001
+name = "SIM APPROACH MARK"
+class = "aton"
+position = { lat = 28.4040, lon = -80.5200 }
+aton_type = 29                # safe water
+virtual_aton = true
+motion = { mode = "stationary" }
+
+[[ais.targets]]
+mmsi = 1009001
+name = "SIM BASE"
+class = "base_station"
+position = { lat = 28.4100, lon = -80.6100 }
+motion = { mode = "stationary" }
+[ais.targets.static]
+epfd = 7                      # surveyed

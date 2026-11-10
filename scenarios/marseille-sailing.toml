@@ -1,0 +1,161 @@
+# Built-in scenario: a 12 m cruising yacht sailing a loop off Marseille in a northwesterly.
+# Leg 1 → 2 is dead upwind, so the autopilot tacks on the laylines.
+# Every section is optional except [initial].
+name = "Marseille sailing loop"
+
+[simulation]
+time_scale = 1.0
+paused = false
+seed = 1
+# start_time = "2026-06-21T08:00:00Z"   # omit to start at wall-clock time
+
+[vessel]
+name = "SIMULATOR"
+mmsi = 100000003
+call_sign = "SIM01"
+propulsion = "sail"          # "sail" or "motor"
+# polar_file = "my-boat.pol" # relative to this file; omit for the built-in cruiser polar
+polar_efficiency = 0.95
+length_m = 12.0
+beam_m = 4.0
+draft_m = 2.0
+max_rot_dpm = 180.0
+rot_time_constant_s = 2.5
+speed_time_constant_s = 20.0
+max_speed_kn = 8.0
+max_rudder_deg = 35.0
+heel_coefficient = 0.06
+max_heel_deg = 30.0
+leeway_coefficient = 8.0
+roll_period_s = 4.5
+idle_rpm = 800.0
+max_rpm = 3000.0
+
+[initial]
+position = { lat = 43.2550, lon = 5.3100 }
+heading = 240.0
+speed = 6.0
+target_speed = 6.0           # used when motoring
+engine_on = false
+
+[steering]
+mode = "route"               # "heading", "wind_angle" or "route"
+looped = true
+arrival_radius_m = 80.0
+waypoints = [
+  { lat = 43.2300, lon = 5.2500 },
+  { lat = 43.2500, lon = 5.2000 },
+  { lat = 43.2700, lon = 5.2300 },
+  { lat = 43.2550, lon = 5.3000 },
+]
+
+# Base values; the dynamics below add gusts, shifts, tide and the pressure trend.
+[environment]
+wind_speed = 14.0
+wind_direction = 300.0
+current_speed = 0.3
+current_set = 110.0
+seabed_depth = 50.0          # used where there are no soundings
+water_temp = 17.5
+air_temp = 21.0
+pressure = 1016.0
+humidity = 65.0
+magnetic_variation = 2.5
+wave_height = 1.2
+wave_period = 5.0
+wave_direction = 300.0
+
+[dynamics]
+pressure_trend_hpa_h = -0.3
+
+[dynamics.wind]
+gust_fraction = 0.12         # gust standard deviation, fraction of the mean
+gust_period_s = 20.0
+shift_deg = 6.0              # direction shift standard deviation
+shift_period_s = 180.0
+
+[tide]
+enabled = false              # the Mediterranean is nearly tideless
+
+# Approximate, illustrative soundings (metres below chart datum) — NOT for navigation.
+# Add more with `csv = "depths.csv"` (lat,lon,depth per line).
+[bathymetry]
+neighbours = 4
+soundings = [
+  { lat = 43.2200, lon = 5.2200, depth = 80.0 },
+  { lat = 43.2300, lon = 5.2500, depth = 62.0 },
+  { lat = 43.2400, lon = 5.2800, depth = 55.0 },
+  { lat = 43.2500, lon = 5.2000, depth = 75.0 },
+  { lat = 43.2600, lon = 5.2600, depth = 50.0 },
+  { lat = 43.2550, lon = 5.3000, depth = 38.0 },
+  { lat = 43.2700, lon = 5.2300, depth = 55.0 },
+  { lat = 43.2800, lon = 5.2500, depth = 45.0 },
+  { lat = 43.2750, lon = 5.2850, depth = 25.0 },
+  { lat = 43.2700, lon = 5.3000, depth = 15.0 },
+  { lat = 43.2790, lon = 5.3080, depth = 1.0 },   # Frioul islands
+  { lat = 43.2850, lon = 5.3300, depth = 18.0 },
+  { lat = 43.2600, lon = 5.3300, depth = 35.0 },
+  { lat = 43.2400, lon = 5.3300, depth = 45.0 },
+  { lat = 43.2900, lon = 5.3400, depth = 14.0 },
+]
+
+# Overrides change what is reported (channels) or what drives the physics (environment).
+# mode = "replace" | "offset" | "freeze"
+# [overrides.channels]
+# depth = { mode = "replace", value = 2.0 }
+
+# Sensor error examples (all optional):
+# [[sensors]]
+# kind = "compass"
+# angle_bias_deg = 1.5
+# deviation = { a = 0.5, b = 3.0, c = -1.0 }
+
+# Illustrative traffic (fictitious names and MMSIs).
+[[ais.targets]]
+mmsi = 100300001
+name = "MISTRAL"
+call_sign = "FMI101"
+class = "a"
+position = { lat = 43.3100, lon = 5.3550 }
+motion = { mode = "route", sog_kn = 19.0, looped = false, waypoints = [
+  { lat = 43.2900, lon = 5.3000 },
+  { lat = 43.2000, lon = 5.2800 },
+  { lat = 42.8000, lon = 5.6000 },
+] }
+[ais.targets.static]
+ship_type = 60
+to_bow = 130
+to_stern = 45
+to_port = 15
+to_starboard = 15
+draught_m = 6.8
+destination = "AJACCIO"
+
+[[ais.targets]]
+mmsi = 100300002
+name = "LOU PESCADOU"
+class = "a"
+position = { lat = 43.2300, lon = 5.3300 }
+nav_status = 7
+max_rot_dpm = 120.0
+motion = { mode = "course", cog = 250.0, sog_kn = 3.5 }
+[ais.targets.static]
+ship_type = 30
+to_bow = 14
+to_stern = 6
+to_port = 3
+to_starboard = 3
+
+[[ais.targets]]
+mmsi = 100300003
+name = "CALANQUE"
+call_sign = "FCA103"
+class = "b"
+position = { lat = 43.2700, lon = 5.2700 }
+motion = { mode = "course", cog = 120.0, sog_kn = 5.5 }
+[ais.targets.static]
+ship_type = 36
+to_bow = 8
+to_stern = 3
+to_port = 2
+to_starboard = 2

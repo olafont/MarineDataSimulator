@@ -1,0 +1,18 @@
+[package]
+name = "engine"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+sim-core.workspace = true
+sim-sensors.workspace = true
+protocols.workspace = true
+transports.workspace = true
+scenario.workspace = true
+arc-swap.workspace = true
+crossbeam-channel.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+chrono.workspace = true

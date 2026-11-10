@@ -1,0 +1,24 @@
+[package]
+name = "cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "marine-sim-cli"
+path = "src/main.rs"
+
+[dependencies]
+sim-core.workspace = true
+sim-sensors.workspace = true
+protocols.workspace = true
+transports.workspace = true
+scenario.workspace = true
+tokio.workspace = true
+chrono.workspace = true
+clap.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+engine.workspace = true

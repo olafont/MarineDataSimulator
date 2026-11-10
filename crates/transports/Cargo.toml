@@ -1,0 +1,15 @@
+[package]
+name = "transports"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+tokio.workspace = true
+tracing.workspace = true
+serde.workspace = true
+anyhow.workspace = true
+serialport.workspace = true
+tokio-tungstenite.workspace = true
+futures-util.workspace = true

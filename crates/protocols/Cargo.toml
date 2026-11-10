@@ -1,0 +1,16 @@
+[package]
+name = "protocols"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+sim-core.workspace = true
+sim-sensors.workspace = true
+chrono.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+nmea.workspace = true
+ais.workspace = true

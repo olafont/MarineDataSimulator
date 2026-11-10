@@ -1,0 +1,94 @@
+# Builds and tests the whole workspace (GUI included) on Linux, Windows and macOS.
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - uses: Swatinem/rust-cache@v2
+
+      # eframe (window, OpenGL, keyboard) and rfd (file dialogs) on Linux.
+      - name: Install Linux GUI libraries
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxkbcommon-dev libgl1-mesa-dev libwayland-dev \
+            libx11-dev libxcursor-dev libxrandr-dev libxi-dev libgtk-3-dev
+
+      # The map's HTTPS stack (aws-lc-sys) may need NASM on Windows.
+      - name: Install NASM
+        if: runner.os == 'Windows'
+        uses: ilammy/setup-nasm@v1
+
+      - name: Build
+        run: cargo build --workspace --all-targets --locked
+
+      - name: Test
+        run: cargo test --workspace --locked
+
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+
+      # A short headless run of every built-in scenario.
+      - name: Headless scenarios
+        shell: bash
+        run: |
+          for s in $(cargo run -q -p cli --locked -- --list | awk '{print $1}' | grep '\.toml$'); do
+            echo "== $s"
+            cargo run -q -p cli --locked -- --builtin "$s" --time-scale 20 --duration 5 --print > out.nmea
+            test -s out.nmea
+            grep -q '^\$GPRMC' out.nmea
+            grep -q '^!AIVDM' out.nmea
+          done
+
+      # NMEA 2000 and Signal K: every format produces well-formed lines.
+      - name: NMEA 2000 and Signal K formats
+        shell: bash
+        run: |
+          run() { cargo run -q -p cli --locked -- --time-scale 20 --duration 3 --print --print-format "$1" > "$1.txt"; test -s "$1.txt"; }
+          run yd_raw && grep -Eq '^[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3} R 09F8010A( [0-9A-F]{2}){8}$' yd_raw.txt
+          run actisense_ascii && grep -Eq '^A[0-9]{6}\.[0-9]{3} 0AFF2 1F801 [0-9A-F]{16}$' actisense_ascii.txt
+          run canboat_plain && grep -q ',2,129025,10,255,8,' canboat_plain.txt
+          run signalk && grep -q '"path":"navigation.position"' signalk.txt
+
+      # Record a short run, then replay it: the replayed lines must match the recording.
+      - name: Record and replay
+        shell: bash
+        run: |
+          cargo run -q -p cli --locked -- --time-scale 20 --duration 3 --record rec.nmea
+          test -s rec.nmea
+          cargo run -q -p cli --locked -- --replay rec.nmea --replay-speed 20 --exit-after-replay --print > replayed.txt
+          sed 's/^\\[^\\]*\\//' rec.nmea | tr -d '\r' > expected.txt
+          tr -d '\r' < replayed.txt | diff -q expected.txt -
+
+      # Universal "Marine Data Simulator.app" in a DMG, downloadable from the run's artifacts.
+      - name: macOS app
+        if: runner.os == 'macOS'
+        run: scripts/build-macos-app.sh --universal
+
+      - name: Upload macOS app
+        if: runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-app
+          path: target/macos/*.dmg
+          if-no-files-found: error
