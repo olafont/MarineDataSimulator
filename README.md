@@ -1,5 +1,25 @@
 # Marine Data Simulator
 
+![Marine Data Simulator: a sailing boat off Cape Canaveral with AIS traffic, its route, the environment and the NMEA output](docs/screenshot.png)
+
+## Download
+
+Ready-to-run builds for **macOS** (Apple Silicon and Intel), **Windows** and **Linux** are on the
+**[Releases page](https://github.com/olafont/MarineDataSimulator/releases/latest)**:
+
+| System | File |
+|---|---|
+| macOS | `MarineDataSimulator-<version>-macos-universal.dmg`: open it and drag the app to Applications |
+| Windows (x86-64) | `marine-data-simulator-<version>-windows-x86_64.zip`: unzip and run `marine-sim.exe` |
+| Linux (x86-64) | `marine-data-simulator-<version>-linux-x86_64.tar.gz`: unpack and run `marine-sim` |
+
+The Windows and Linux archives also contain the command-line simulator, `marine-sim-cli`.
+The builds are not signed with a developer certificate, so the system warns the first time you
+open them. See [the manual](docs/USER_MANUAL.md#install) for macOS. On Windows, choose
+**More info → Run anyway**. To build from source, see [Quick start](#quick-start).
+
+## About
+
 A desktop simulator of marine instrument data, written in Rust with [egui](https://github.com/emilk/egui).
 A vessel sails or motors through a simulated environment (wind, current, tide, waves, depth,
 weather). Its instruments send **NMEA 0183**, **NMEA 2000** (in the text formats gateways use),
