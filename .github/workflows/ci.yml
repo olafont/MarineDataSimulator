@@ -1,9 +1,8 @@
 # Builds and tests the whole workspace (GUI included) on Linux, Windows and macOS.
+# Runs only when started by hand: Actions → CI → Run workflow, or `gh workflow run ci.yml`.
 name: CI
 
 on:
-  push:
-  pull_request:
   workflow_dispatch:
 
 env:
