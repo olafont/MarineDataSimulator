@@ -379,6 +379,9 @@ pub const BUILTIN: &[(&str, &str)] = &[
     ("cape-canaveral-sailing.toml", include_str!("../../../scenarios/cape-canaveral-sailing.toml")),
     ("marseille-sailing.toml", include_str!("../../../scenarios/marseille-sailing.toml")),
     ("channel-crossing-motor.toml", include_str!("../../../scenarios/channel-crossing-motor.toml")),
+    ("singapore-strait-motor.toml", include_str!("../../../scenarios/singapore-strait-motor.toml")),
+    ("long-beach-sailing.toml", include_str!("../../../scenarios/long-beach-sailing.toml")),
+    ("gibraltar-strait-sailing.toml", include_str!("../../../scenarios/gibraltar-strait-sailing.toml")),
 ];
 
 /// The scenario used when none is given.

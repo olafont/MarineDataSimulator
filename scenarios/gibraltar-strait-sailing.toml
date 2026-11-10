@@ -1,0 +1,196 @@
+# Built-in scenario: a 12 m yacht crossing the Strait of Gibraltar from Europa Point to Ceuta
+# on a beam reach in a strong levanter (easterly). The crossing cuts through both traffic
+# lanes, and the Atlantic inflow sets the boat east.
+# Positions, depths, currents and traffic are illustrative only: NOT for navigation.
+name = "Strait of Gibraltar crossing"
+
+[simulation]
+seed = 13
+
+[vessel]
+name = "SIM LEVANTE"
+mmsi = 100000006
+call_sign = "SIM06"
+propulsion = "sail"
+polar_efficiency = 0.95
+length_m = 12.0
+beam_m = 4.0
+draft_m = 2.0
+max_speed_kn = 8.0
+heel_coefficient = 0.06
+max_heel_deg = 30.0
+leeway_coefficient = 8.0
+roll_period_s = 4.5
+idle_rpm = 800.0
+max_rpm = 3000.0
+
+[initial]
+position = { lat = 36.1000, lon = -5.3400 }
+heading = 185.0
+speed = 6.5
+target_speed = 6.5
+engine_on = false
+
+[steering]
+mode = "route"
+looped = false
+arrival_radius_m = 150.0
+waypoints = [
+  { lat = 36.0200, lon = -5.3400 },
+  { lat = 35.9400, lon = -5.3200 },
+  { lat = 35.9050, lon = -5.3050 },
+]
+
+# Levanter: strong, gusty easterly funnelled through the Strait, with a short steep sea.
+[environment]
+wind_speed = 22.0
+wind_direction = 90.0
+current_speed = 1.2           # Atlantic water flowing into the Mediterranean
+current_set = 80.0
+seabed_depth = 600.0          # used where there are no soundings
+water_temp = 17.0
+air_temp = 20.0
+pressure = 1019.0
+humidity = 75.0
+magnetic_variation = -0.3
+wave_height = 1.8
+wave_period = 5.0
+wave_direction = 90.0
+
+[dynamics]
+pressure_trend_hpa_h = 0.2
+
+[dynamics.wind]
+gust_fraction = 0.18
+gust_period_s = 15.0
+shift_deg = 6.0
+shift_period_s = 180.0
+
+[tide]
+enabled = true
+range_m = 1.0
+period_h = 12.42
+flood_set_deg = 270.0
+max_rate_kn = 1.0
+
+# Approximate, illustrative soundings (metres below chart datum): NOT for navigation.
+[bathymetry]
+neighbours = 4
+soundings = [
+  { lat = 36.1060, lon = -5.3450, depth = 30.0 },
+  { lat = 36.1000, lon = -5.3400, depth = 60.0 },
+  { lat = 36.0800, lon = -5.3600, depth = 180.0 },
+  { lat = 36.0500, lon = -5.3400, depth = 450.0 },
+  { lat = 36.0200, lon = -5.3400, depth = 700.0 },
+  { lat = 35.9900, lon = -5.3300, depth = 800.0 },
+  { lat = 35.9600, lon = -5.3200, depth = 600.0 },
+  { lat = 35.9400, lon = -5.3200, depth = 300.0 },
+  { lat = 35.9200, lon = -5.3100, depth = 90.0 },
+  { lat = 35.9050, lon = -5.3050, depth = 25.0 },
+  { lat = 36.0000, lon = -5.5000, depth = 400.0 },
+  { lat = 36.0000, lon = -5.2000, depth = 900.0 },
+]
+
+# Illustrative traffic (fictitious names, MMSIs and call signs): westbound and eastbound
+# ships in their lanes, a tanker at the eastern anchorage, a fast ferry to Ceuta, a fishing
+# boat and a yacht.
+[[ais.targets]]
+mmsi = 100600001
+name = "ATLANTIC CROWN"
+call_sign = "SIMGI1"
+class = "a"
+position = { lat = 36.0150, lon = -5.1800 }
+motion = { mode = "course", cog = 262.0, sog_kn = 16.0 }
+[ais.targets.static]
+ship_type = 70                # cargo (container ship)
+imo = 9600001
+to_bow = 330
+to_stern = 69
+to_port = 29
+to_starboard = 30
+draught_m = 15.0
+destination = "USNYC"
+
+[[ais.targets]]
+mmsi = 100600002
+name = "MEDITERRANEAN SPIRIT"
+call_sign = "SIMGI2"
+class = "a"
+position = { lat = 35.9550, lon = -5.5200 }
+motion = { mode = "course", cog = 76.0, sog_kn = 13.0 }
+[ais.targets.static]
+ship_type = 80                # tanker
+imo = 9600002
+to_bow = 210
+to_stern = 40
+to_port = 22
+to_starboard = 22
+draught_m = 13.2
+destination = "EGPSD"
+
+[[ais.targets]]
+mmsi = 100600003
+name = "ROCK SUPPLIER"
+call_sign = "SIMGI3"
+class = "a"
+position = { lat = 36.1400, lon = -5.3250 }
+nav_status = 1                # at anchor: swings to the wind
+motion = { mode = "stationary" }
+[ais.targets.static]
+ship_type = 80
+imo = 9600003
+to_bow = 150
+to_stern = 30
+to_port = 14
+to_starboard = 14
+draught_m = 9.0
+destination = "GIBRALTAR"
+
+[[ais.targets]]
+mmsi = 100600004
+name = "STRAIT RUNNER"
+call_sign = "SIMGI4"
+class = "a"
+position = { lat = 36.1250, lon = -5.4250 }
+motion = { mode = "route", sog_kn = 26.0, looped = true, waypoints = [
+  { lat = 36.0700, lon = -5.4000 },
+  { lat = 35.9000, lon = -5.3100 },
+  { lat = 36.0700, lon = -5.4000 },
+  { lat = 36.1250, lon = -5.4250 },
+] }
+[ais.targets.static]
+ship_type = 40                # high-speed craft
+to_bow = 70
+to_stern = 25
+to_port = 7
+to_starboard = 7
+draught_m = 2.5
+destination = "CEUTA"
+
+[[ais.targets]]
+mmsi = 100600005
+name = "BOQUERON"
+class = "a"
+position = { lat = 35.9300, lon = -5.4000 }
+nav_status = 7                # engaged in fishing
+max_rot_dpm = 120.0
+motion = { mode = "course", cog = 280.0, sog_kn = 3.0 }
+[ais.targets.static]
+ship_type = 30                # fishing
+to_bow = 16
+to_stern = 6
+to_port = 3
+to_starboard = 3
+
+[[ais.targets]]
+mmsi = 100600006
+name = "PILLARS"
+class = "b"
+position = { lat = 36.0800, lon = -5.2800 }
+motion = { mode = "course", cog = 250.0, sog_kn = 6.0 }
+[ais.targets.static]
+ship_type = 36                # sailing
+to_bow = 9
+to_stern = 3
+to_port = 2
+to_starboard = 2

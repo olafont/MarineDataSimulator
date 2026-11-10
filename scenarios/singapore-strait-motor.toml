@@ -1,0 +1,201 @@
+# Built-in scenario: a 14 m motor launch running a loop off Singapore's East Coast, beside the
+# anchorages and the Singapore Strait traffic lanes, in the northeast monsoon.
+# Positions, depths, tide and traffic are illustrative only: NOT for navigation.
+name = "Singapore Strait (motor)"
+
+[simulation]
+seed = 11
+
+[vessel]
+name = "SIM LAUNCH"
+mmsi = 100000004
+call_sign = "SIM04"
+propulsion = "motor"
+length_m = 14.0
+beam_m = 4.2
+draft_m = 1.2
+max_speed_kn = 20.0
+speed_time_constant_s = 20.0
+roll_period_s = 4.0
+idle_rpm = 700.0
+max_rpm = 2800.0
+
+[initial]
+position = { lat = 1.2750, lon = 103.9000 }
+heading = 115.0
+speed = 12.0
+target_speed = 12.0
+
+[steering]
+mode = "route"
+looped = true
+arrival_radius_m = 120.0
+waypoints = [
+  { lat = 1.2580, lon = 103.9500 },
+  { lat = 1.2560, lon = 104.0100 },
+  { lat = 1.2700, lon = 104.0500 },
+  { lat = 1.2880, lon = 103.9950 },
+  { lat = 1.2750, lon = 103.9000 },
+]
+
+# Northeast monsoon: steady breeze, warm humid air, short chop.
+[environment]
+wind_speed = 12.0
+wind_direction = 40.0
+current_speed = 0.4
+current_set = 250.0
+seabed_depth = 30.0          # used where there are no soundings
+water_temp = 29.5
+air_temp = 30.0
+pressure = 1009.0
+humidity = 80.0
+magnetic_variation = 0.2
+wave_height = 0.6
+wave_period = 4.0
+wave_direction = 40.0
+
+[dynamics]
+pressure_trend_hpa_h = 0.0
+
+[dynamics.wind]
+gust_fraction = 0.10
+gust_period_s = 25.0
+shift_deg = 5.0
+shift_period_s = 300.0
+
+[tide]
+enabled = true
+range_m = 2.5
+period_h = 12.42
+flood_set_deg = 270.0
+max_rate_kn = 1.5
+
+# Approximate, illustrative soundings (metres below chart datum): NOT for navigation.
+[bathymetry]
+neighbours = 4
+soundings = [
+  { lat = 1.2950, lon = 103.9000, depth = 6.0 },
+  { lat = 1.2800, lon = 103.9000, depth = 14.0 },
+  { lat = 1.2600, lon = 103.9300, depth = 22.0 },
+  { lat = 1.2950, lon = 103.9600, depth = 8.0 },
+  { lat = 1.2750, lon = 103.9600, depth = 18.0 },
+  { lat = 1.2500, lon = 103.9700, depth = 28.0 },
+  { lat = 1.3000, lon = 104.0000, depth = 9.0 },
+  { lat = 1.2800, lon = 104.0100, depth = 20.0 },
+  { lat = 1.2550, lon = 104.0100, depth = 32.0 },
+  { lat = 1.2300, lon = 104.0000, depth = 45.0 },
+  { lat = 1.2100, lon = 104.0000, depth = 60.0 },
+  { lat = 1.2700, lon = 104.0600, depth = 24.0 },
+  { lat = 1.2400, lon = 104.0600, depth = 40.0 },
+]
+
+# Illustrative traffic (fictitious names, MMSIs and call signs): both Strait lanes, an anchored
+# bulk carrier, a bunker tanker, a ferry across the lanes and a pleasure boat.
+[[ais.targets]]
+mmsi = 100400001
+name = "EASTERN HORIZON"
+call_sign = "SIMSG1"
+class = "a"
+position = { lat = 1.2400, lon = 104.1500 }
+motion = { mode = "route", sog_kn = 15.0, looped = false, waypoints = [
+  { lat = 1.2330, lon = 104.0000 },
+  { lat = 1.2150, lon = 103.8500 },
+  { lat = 1.1900, lon = 103.7000 },
+] }
+[ais.targets.static]
+ship_type = 70                # cargo (container ship)
+imo = 9400001
+to_bow = 320
+to_stern = 79
+to_port = 29
+to_starboard = 30
+draught_m = 15.2
+destination = "NLRTM"
+
+[[ais.targets]]
+mmsi = 100400002
+name = "PACIFIC JADE"
+call_sign = "SIMSG2"
+class = "a"
+position = { lat = 1.1950, lon = 103.8200 }
+motion = { mode = "course", cog = 78.0, sog_kn = 12.5 }
+[ais.targets.static]
+ship_type = 80                # tanker
+imo = 9400002
+to_bow = 200
+to_stern = 50
+to_port = 22
+to_starboard = 22
+draught_m = 13.8
+destination = "CNSHA"
+
+[[ais.targets]]
+mmsi = 100400003
+name = "STRAITS VENTURE"
+call_sign = "SIMSG3"
+class = "a"
+position = { lat = 1.2680, lon = 103.9650 }
+nav_status = 1                # at anchor: swings to the wind
+motion = { mode = "stationary" }
+[ais.targets.static]
+ship_type = 70
+imo = 9400003
+to_bow = 190
+to_stern = 35
+to_port = 16
+to_starboard = 16
+draught_m = 12.4
+destination = "SINGAPORE"
+
+[[ais.targets]]
+mmsi = 100400004
+name = "MARINA BUNKER"
+call_sign = "SIMSG4"
+class = "a"
+position = { lat = 1.2850, lon = 103.9300 }
+motion = { mode = "route", sog_kn = 7.0, looped = true, waypoints = [
+  { lat = 1.2690, lon = 103.9620 },
+  { lat = 1.2850, lon = 103.9300 },
+] }
+[ais.targets.static]
+ship_type = 80
+to_bow = 75
+to_stern = 15
+to_port = 7
+to_starboard = 7
+draught_m = 5.5
+destination = "EAST ANCH"
+
+[[ais.targets]]
+mmsi = 100400005
+name = "ISLAND HOPPER"
+call_sign = "SIMSG5"
+class = "a"
+position = { lat = 1.3080, lon = 103.9900 }
+motion = { mode = "route", sog_kn = 25.0, looped = true, waypoints = [
+  { lat = 1.2000, lon = 104.0300 },
+  { lat = 1.1450, lon = 104.0500 },
+  { lat = 1.2000, lon = 104.0300 },
+  { lat = 1.3080, lon = 103.9900 },
+] }
+[ais.targets.static]
+ship_type = 60                # passenger
+to_bow = 30
+to_stern = 10
+to_port = 4
+to_starboard = 4
+draught_m = 1.8
+destination = "BATAM"
+
+[[ais.targets]]
+mmsi = 100400006
+name = "LAZY LION"
+class = "b"
+position = { lat = 1.2900, lon = 103.9450 }
+motion = { mode = "course", cog = 95.0, sog_kn = 6.0 }
+[ais.targets.static]
+ship_type = 37                # pleasure craft
+to_bow = 10
+to_stern = 3
+to_port = 2
+to_starboard = 2

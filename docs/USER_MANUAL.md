@@ -121,8 +121,9 @@ software.
    place where that counts as good seamanship.
 6. **Add an output** for your own software with **Data › Add output**
    ([section 9](#9-outputs-recording-and-replay)).
-7. **Try other waters** from the **Scenario** tab: Marseille under sail, or a motor vessel
-   crossing the Channel in a strong tide.
+7. **Try other waters** from the **Scenario** tab: Marseille under sail, a motor vessel
+   crossing the Channel in a strong tide, a launch off Singapore, a sea-breeze sail off Long
+   Beach, or a windy crossing of the Strait of Gibraltar.
 
 If you make a mess, **Reset** puts everything back as the scenario started.
 
@@ -216,7 +217,7 @@ keep only the tabs; click any tab to show them again.
 | | Steering | **Heading**, **Wind angle**, **Route** |
 | | Propulsion | **Engine** on or off (sailing vessels only) |
 | **Scenario** | File | **Open…** a scenario file, **Save as…** the current state, **Reset** to the scenario's initial state |
-| | Built-in scenarios | **cape canaveral sailing**, **marseille sailing**, **channel crossing motor** |
+| | Built-in scenarios | **cape canaveral sailing**, **marseille sailing**, **channel crossing motor**, **singapore strait motor**, **long beach sailing**, **gibraltar strait sailing** |
 | **Chart** | Route | **Add waypoints** by clicking the chart, **Clear route** |
 | | Display | **Seamarks** overlay on or off, **Clear track** |
 | **AIS traffic** | Add | The **Class** of new targets; add a **Target**, a **Collision** course target or **Random** traffic |

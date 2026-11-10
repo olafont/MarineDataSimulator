@@ -1,0 +1,202 @@
+# Built-in scenario: a 12 m yacht sailing a loop outside the Long Beach breakwater in the
+# afternoon westerly sea breeze, with a long Pacific swell and port traffic.
+# Leg 2 → 3 is dead upwind, so the autopilot tacks.
+# Positions, depths, tide and traffic are illustrative only: NOT for navigation.
+name = "Long Beach sailing loop"
+
+[simulation]
+seed = 12
+
+[vessel]
+name = "SIM PACIFIC"
+mmsi = 100000005
+call_sign = "SIM05"
+propulsion = "sail"
+polar_efficiency = 0.95
+length_m = 12.0
+beam_m = 4.0
+draft_m = 2.0
+max_speed_kn = 8.0
+heel_coefficient = 0.06
+max_heel_deg = 30.0
+leeway_coefficient = 8.0
+roll_period_s = 4.5
+idle_rpm = 800.0
+max_rpm = 3000.0
+
+[initial]
+position = { lat = 33.7050, lon = -118.1200 }
+heading = 200.0
+speed = 6.0
+target_speed = 6.0
+engine_on = false
+
+[steering]
+mode = "route"
+looped = true
+arrival_radius_m = 80.0
+waypoints = [
+  { lat = 33.6600, lon = -118.1500 },
+  { lat = 33.6500, lon = -118.0900 },
+  { lat = 33.6650, lon = -118.1950 },
+  { lat = 33.7000, lon = -118.1500 },
+]
+
+# Afternoon sea breeze, cool water, swell from the southwest.
+[environment]
+wind_speed = 14.0
+wind_direction = 265.0
+current_speed = 0.2
+current_set = 300.0
+seabed_depth = 40.0          # used where there are no soundings
+water_temp = 18.5
+air_temp = 23.0
+pressure = 1014.0
+humidity = 70.0
+magnetic_variation = 11.3
+wave_height = 1.3
+wave_period = 12.0
+wave_direction = 225.0
+
+[dynamics]
+pressure_trend_hpa_h = -0.2
+
+[dynamics.wind]
+gust_fraction = 0.10
+gust_period_s = 30.0
+shift_deg = 5.0
+shift_period_s = 240.0
+
+[tide]
+enabled = true
+range_m = 1.6
+period_h = 12.42
+flood_set_deg = 300.0
+max_rate_kn = 0.4
+
+# Approximate, illustrative soundings (metres below chart datum): NOT for navigation.
+[bathymetry]
+neighbours = 4
+soundings = [
+  { lat = 33.7150, lon = -118.1500, depth = 15.0 },
+  { lat = 33.7150, lon = -118.1000, depth = 13.0 },
+  { lat = 33.7050, lon = -118.1950, depth = 19.0 },
+  { lat = 33.7000, lon = -118.1500, depth = 20.0 },
+  { lat = 33.7000, lon = -118.0800, depth = 16.0 },
+  { lat = 33.6800, lon = -118.1200, depth = 26.0 },
+  { lat = 33.6650, lon = -118.1950, depth = 40.0 },
+  { lat = 33.6600, lon = -118.1500, depth = 38.0 },
+  { lat = 33.6500, lon = -118.0900, depth = 35.0 },
+  { lat = 33.6300, lon = -118.1500, depth = 60.0 },
+  { lat = 33.6200, lon = -118.0800, depth = 55.0 },
+]
+
+# Illustrative traffic (fictitious names, MMSIs and call signs): a container ship heading
+# for the port entrance, two ships at anchor, a pilot boat, an island ferry and a yacht.
+[[ais.targets]]
+mmsi = 100500001
+name = "CALIFORNIA DAWN"
+call_sign = "SIMLB1"
+class = "a"
+position = { lat = 33.5200, lon = -118.0300 }
+motion = { mode = "route", sog_kn = 12.0, looped = false, waypoints = [
+  { lat = 33.6600, lon = -118.1300 },
+  { lat = 33.7120, lon = -118.1750 },
+] }
+[ais.targets.static]
+ship_type = 70                # cargo (container ship)
+imo = 9500001
+to_bow = 300
+to_stern = 66
+to_port = 25
+to_starboard = 26
+draught_m = 14.0
+destination = "USLGB"
+
+[[ais.targets]]
+mmsi = 100500002
+name = "PACIFIC MERIDIAN"
+call_sign = "SIMLB2"
+class = "a"
+position = { lat = 33.6800, lon = -118.1350 }
+nav_status = 1                # at anchor: swings to the wind
+motion = { mode = "stationary" }
+[ais.targets.static]
+ship_type = 70
+imo = 9500002
+to_bow = 260
+to_stern = 50
+to_port = 20
+to_starboard = 20
+draught_m = 12.5
+destination = "USLGB"
+
+[[ais.targets]]
+mmsi = 100500003
+name = "GOLDEN PELICAN"
+call_sign = "SIMLB3"
+class = "a"
+position = { lat = 33.6900, lon = -118.0650 }
+nav_status = 1
+motion = { mode = "stationary" }
+[ais.targets.static]
+ship_type = 80                # tanker
+imo = 9500004
+to_bow = 200
+to_stern = 45
+to_port = 21
+to_starboard = 21
+draught_m = 11.5
+destination = "USLGB"
+
+[[ais.targets]]
+mmsi = 100500004
+name = "SIM PILOT"
+call_sign = "SIMLB4"
+class = "a"
+position = { lat = 33.7100, lon = -118.1800 }
+motion = { mode = "route", sog_kn = 16.0, looped = true, waypoints = [
+  { lat = 33.6650, lon = -118.1350 },
+  { lat = 33.7100, lon = -118.1800 },
+] }
+[ais.targets.static]
+ship_type = 50                # pilot vessel
+to_bow = 14
+to_stern = 5
+to_port = 3
+to_starboard = 3
+draught_m = 1.5
+
+[[ais.targets]]
+mmsi = 100500005
+name = "ISLAND EXPRESS"
+call_sign = "SIMLB5"
+class = "a"
+position = { lat = 33.7300, lon = -118.2050 }
+motion = { mode = "route", sog_kn = 28.0, looped = true, waypoints = [
+  { lat = 33.7100, lon = -118.1800 },
+  { lat = 33.3500, lon = -118.3200 },
+  { lat = 33.7100, lon = -118.1800 },
+  { lat = 33.7300, lon = -118.2050 },
+] }
+[ais.targets.static]
+ship_type = 40                # high-speed craft
+to_bow = 30
+to_stern = 10
+to_port = 5
+to_starboard = 5
+draught_m = 2.0
+destination = "AVALON"
+
+[[ais.targets]]
+mmsi = 100500006
+name = "SALT SHAKER"
+class = "b"
+position = { lat = 33.6750, lon = -118.1000 }
+motion = { mode = "course", cog = 160.0, sog_kn = 5.5 }
+[ais.targets.static]
+ship_type = 36                # sailing
+to_bow = 9
+to_stern = 3
+to_port = 2
+to_starboard = 2

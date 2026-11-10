@@ -131,6 +131,9 @@ sensors (e.g. `RMC, GGA`, `129025, 130306` or `gps, wind`).
 | [`cape-canaveral-sailing.toml`](scenarios/cape-canaveral-sailing.toml) (default) | A 12 m yacht sails a loop off Cocoa Beach in an east-southeasterly breeze, with one upwind leg and 7 AIS stations. |
 | [`marseille-sailing.toml`](scenarios/marseille-sailing.toml) | A yacht sails with gusts, waves and soundings. One leg is upwind, so the boat tacks. |
 | [`channel-crossing-motor.toml`](scenarios/channel-crossing-motor.toml) | A motor vessel in a 5 m tide with 2.5 kn tidal streams and ferry traffic. |
+| [`singapore-strait-motor.toml`](scenarios/singapore-strait-motor.toml) | A motor launch loops off Singapore's East Coast in the northeast monsoon, beside the anchorages and the Strait's traffic lanes. |
+| [`long-beach-sailing.toml`](scenarios/long-beach-sailing.toml) | A yacht sails outside the Long Beach breakwater in a westerly sea breeze and a long swell. One leg is upwind, with ships at anchor and a pilot boat. |
+| [`gibraltar-strait-sailing.toml`](scenarios/gibraltar-strait-sailing.toml) | A yacht crosses the Strait of Gibraltar to Ceuta in a strong levanter, through both traffic lanes, while the Atlantic inflow sets it east. |
 
 Depths and traffic are illustrative. **Do not use them for navigation.**
 
