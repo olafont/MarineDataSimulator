@@ -13,7 +13,7 @@ use engine::{Engine, ReplayCommand, scenario};
 #[derive(Parser, Debug)]
 #[command(name = "marine-sim-cli", version, about = "Marine data simulator (headless)")]
 struct Args {
-    /// Scenario file (TOML). Defaults to the built-in Cape Canaveral loop.
+    /// Scenario file (TOML). Defaults to the built-in Strait of Gibraltar crossing.
     #[arg(short, long)]
     scenario: Option<PathBuf>,
     /// Use a built-in scenario by file name (see --list).

@@ -40,31 +40,29 @@ also speaks French and German ([section 10](#10-preferences-and-saved-settings))
 
 ### Install
 
-**macOS.** Open the disk image (`MarineDataSimulator-<version>-macos-<arch>.dmg`) and drag the
-app to Applications. To build the app and the disk image yourself:
+Latest release, **[v0.1.1](https://github.com/olafont/MarineDataSimulator/releases/latest)**:
 
-```sh
-scripts/build-macos-app.sh               # this Mac's architecture
-scripts/build-macos-app.sh --universal   # Apple Silicon and Intel
-scripts/build-macos-app.sh --no-dmg      # the app only, no disk image
-```
+- **macOS** (Apple Silicon and Intel): [MarineDataSimulator-0.1.1-macos-universal.dmg](https://github.com/olafont/MarineDataSimulator/releases/download/v0.1.1/MarineDataSimulator-0.1.1-macos-universal.dmg).
+  Open it and drag the app to Applications.
+- **Windows** (x86-64): [marine-data-simulator-0.1.1-windows-x86_64.zip](https://github.com/olafont/MarineDataSimulator/releases/download/v0.1.1/marine-data-simulator-0.1.1-windows-x86_64.zip).
+  Unzip it and run `marine-sim.exe`.
+- **Linux** (x86-64): [marine-data-simulator-0.1.1-linux-x86_64.tar.gz](https://github.com/olafont/MarineDataSimulator/releases/download/v0.1.1/marine-data-simulator-0.1.1-linux-x86_64.tar.gz).
+  Unpack it and run `marine-sim`.
 
-They are written to `target/macos/`.
+The builds are not signed, so the system warns on first launch:
 
-The app is signed *ad hoc*, without an Apple Developer ID, so macOS blocks a copy that comes
-from another Mac or a download the first time you open it:
+- **macOS:** open the app and click **Done** when macOS says it cannot verify the developer.
+  Then go to **System Settings → Privacy & Security**, click **Open Anyway** next to
+  *Marine Data Simulator* and confirm. Or, from a terminal:
+  `xattr -dr com.apple.quarantine "/Applications/Marine Data Simulator.app"`.
+  If macOS asks whether the app may accept incoming network connections, allow it so that
+  other computers can reach its TCP or WebSocket outputs.
+- **Windows:** choose **More info → Run anyway**.
 
-1. Open the app. macOS says it cannot verify the developer; click **Done**.
-2. Go to **System Settings → Privacy & Security** and click **Open Anyway** next to
-   *Marine Data Simulator*, then confirm.
-
-Or, from a terminal: `xattr -dr com.apple.quarantine "/Applications/Marine Data Simulator.app"`.
-macOS may also ask whether the app may accept incoming network connections. Allow it if other
-computers should reach its TCP or WebSocket outputs.
-
-**Windows and Linux**, or to run from source: see the [README](../README.md#quick-start)
-(`cargo run --release -p app`). To start on a scenario of your own, give its file as the first
-argument: `cargo run --release -p app -- my-scenario.toml`.
+To build from source, see the [README](../README.md#quick-start). The macOS app and disk image
+are built by `scripts/build-macos-app.sh` (add `--universal` for Apple Silicon and Intel). To start
+on a scenario of your own, give its file as the first argument:
+`cargo run --release -p app -- my-scenario.toml`.
 
 ### Safety and responsible use
 
@@ -90,8 +88,9 @@ The software comes with no warranty (GPL-3.0, sections 15 and 16).
 
 ### First run
 
-The app opens on the built-in **Cape Canaveral** scenario: a 12 m sailing yacht following a loop
-of waypoints off Cocoa Beach, with AIS traffic around it. It casts off at once and starts
+The app opens on the built-in **Strait of Gibraltar** scenario: a 12 m sailing yacht crossing
+from Europa Point to Ceuta in a strong levanter, through both traffic lanes, with AIS traffic
+around it. It casts off at once and starts
 sending NMEA 0183 on two outputs:
 
 - **TCP 10113**: a TCP server on port 10113. It listens on every network interface
@@ -218,7 +217,7 @@ keep only the tabs; click any tab to show them again.
 | | Steering | **Heading**, **Wind angle**, **Route** |
 | | Propulsion | **Engine** on or off (sailing vessels only) |
 | **Scenario** | File | **Open…** a scenario file, **Save as…** the current state, **Reset** to the scenario's initial state |
-| | Built-in scenarios | **Scenario** list: *Cape Canaveral sailing loop*, *Marseille sailing loop*, *Channel crossing (motor, tidal)*, *Singapore Strait (motor)*, *Long Beach sailing loop*, *Strait of Gibraltar crossing*. Choosing one loads it. |
+| | Built-in scenarios | **Scenario** list: *Strait of Gibraltar crossing*, *Cape Canaveral sailing loop*, *Marseille sailing loop*, *Channel crossing (motor, tidal)*, *Singapore Strait (motor)*, *Long Beach sailing loop*. Choosing one loads it. |
 | **Chart** | Route | **Add waypoints** by clicking the chart, **Clear route** |
 | | Display | **Seamarks** overlay on or off, **Clear track** |
 | **AIS traffic** | Add | The **Class** of new targets; add a **Target**, a **Collision** course target or **Random** traffic |
@@ -803,7 +802,7 @@ cargo run --release -p cli -- [OPTIONS]
 
 | Option | Effect |
 |---|---|
-| `-s, --scenario FILE` | Load a scenario file (default: the built-in Cape Canaveral loop) |
+| `-s, --scenario FILE` | Load a scenario file (default: the built-in Strait of Gibraltar crossing) |
 | `-b, --builtin NAME` | Load a built-in scenario by file name (not together with `--scenario`) |
 | `--list` | List the built-in scenarios and exit |
 | `-p, --print` | Print every line to stdout |

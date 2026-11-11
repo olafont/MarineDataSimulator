@@ -621,6 +621,7 @@ mod tests {
             out("n2k", &rxn2k, DataFormat::CanboatPlain),
             out("sk", &rxsk, DataFormat::SignalK),
         ];
+        let own_name = format!("\"name\":\"{}\"", s.vessel.name);
         let _engine = Engine::start(s, None).unwrap();
         let read = |rx: &std::net::UdpSocket, n: usize| -> Vec<String> {
             let mut buf = [0u8; 2048];
@@ -638,7 +639,7 @@ mod tests {
         assert!(pgns.contains(&129025) && pgns.contains(&127250), "{pgns:?}");
         // Signal K: own-ship identity, then deltas in the own-ship context.
         let lines = read(&rxsk, 10);
-        assert!(lines[0].contains("\"marine-sim.vessel\"") && lines[0].contains("\"name\":\"SIMULATOR\""), "{}", lines[0]);
+        assert!(lines[0].contains("\"marine-sim.vessel\"") && lines[0].contains(&own_name), "{}", lines[0]);
         assert!(lines.iter().all(|l| l.starts_with("{\"context\":\"vessels.urn:mrn:imo:mmsi:")), "{lines:?}");
     }
 

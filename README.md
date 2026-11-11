@@ -1,22 +1,7 @@
 # Marine Data Simulator
 
-![Marine Data Simulator: a sailing boat off Cape Canaveral with AIS traffic, its route, the environment and the NMEA output](docs/screenshot.png)
+![Marine Data Simulator: a sailing boat crossing the Strait of Gibraltar with AIS traffic, its route, the environment and the NMEA output](docs/screenshot.png)
 
-## Download
-
-Ready-to-run builds for **macOS** (Apple Silicon and Intel), **Windows** and **Linux** are on the
-**[Releases page](https://github.com/olafont/MarineDataSimulator/releases/latest)**:
-
-| System | File |
-|---|---|
-| macOS | `MarineDataSimulator-<version>-macos-universal.dmg`: open it and drag the app to Applications |
-| Windows (x86-64) | `marine-data-simulator-<version>-windows-x86_64.zip`: unzip and run `marine-sim.exe` |
-| Linux (x86-64) | `marine-data-simulator-<version>-linux-x86_64.tar.gz`: unpack and run `marine-sim` |
-
-The Windows and Linux archives also contain the command-line simulator, `marine-sim-cli`.
-The builds are not signed with a developer certificate, so the system warns the first time you
-open them. See [the manual](docs/USER_MANUAL.md#install) for macOS. On Windows, choose
-**More info → Run anyway**. To build from source, see [Quick start](#quick-start).
 
 ## About
 
@@ -45,13 +30,20 @@ Runs on macOS, Windows and Linux.
 ⚠️ **For testing only:** never connect it to a vessel under way or feed it into public AIS
 services. See [Safety and responsible use](#safety-and-responsible-use).
 
+## Download
+
+Latest release, **[v0.1.1](https://github.com/olafont/MarineDataSimulator/releases/latest)**:
+
+- **macOS** (Apple Silicon and Intel): [MarineDataSimulator-0.1.1-macos-universal.dmg](https://github.com/olafont/MarineDataSimulator/releases/download/v0.1.1/MarineDataSimulator-0.1.1-macos-universal.dmg)
+- **Windows** (x86-64): [marine-data-simulator-0.1.1-windows-x86_64.zip](https://github.com/olafont/MarineDataSimulator/releases/download/v0.1.1/marine-data-simulator-0.1.1-windows-x86_64.zip)
+- **Linux** (x86-64): [marine-data-simulator-0.1.1-linux-x86_64.tar.gz](https://github.com/olafont/MarineDataSimulator/releases/download/v0.1.1/marine-data-simulator-0.1.1-linux-x86_64.tar.gz)
+
+The builds are not signed, so the system warns on first launch: on macOS see
+[the manual](docs/USER_MANUAL.md#install), on Windows choose **More info → Run anyway**.
+To build from source, see [Quick start](#quick-start).
+
 ## Quick start
 
-You need a [Rust toolchain](https://rustup.rs) (stable).
-
-```sh
-cargo run --release -p app        # desktop app, default scenario off Cape Canaveral
-```
 
 On start, the simulator serves data on **TCP port 10113** (all interfaces) and sends it by
 **UDP to 127.0.0.1:10113**. In OpenCPN, add a network connection with protocol TCP, address
@@ -150,12 +142,12 @@ sensors (e.g. `RMC, GGA`, `129025, 130306` or `gps, wind`).
 
 | File | Description |
 |---|---|
-| [`cape-canaveral-sailing.toml`](scenarios/cape-canaveral-sailing.toml) (default) | A 12 m yacht sails a loop off Cocoa Beach in an east-southeasterly breeze, with one upwind leg and 7 AIS stations. |
+| [`gibraltar-strait-sailing.toml`](scenarios/gibraltar-strait-sailing.toml) (default) | A yacht crosses the Strait of Gibraltar to Ceuta in a strong levanter, through both traffic lanes, while the Atlantic inflow sets it east. |
+| [`cape-canaveral-sailing.toml`](scenarios/cape-canaveral-sailing.toml) | A 12 m yacht sails a loop off Cocoa Beach in an east-southeasterly breeze, with one upwind leg and 7 AIS stations. |
 | [`marseille-sailing.toml`](scenarios/marseille-sailing.toml) | A yacht sails with gusts, waves and soundings. One leg is upwind, so the boat tacks. |
 | [`channel-crossing-motor.toml`](scenarios/channel-crossing-motor.toml) | A motor vessel in a 5 m tide with 2.5 kn tidal streams and ferry traffic. |
 | [`singapore-strait-motor.toml`](scenarios/singapore-strait-motor.toml) | A motor launch loops off Singapore's East Coast in the northeast monsoon, beside the anchorages and the Strait's traffic lanes. |
 | [`long-beach-sailing.toml`](scenarios/long-beach-sailing.toml) | A yacht sails outside the Long Beach breakwater in a westerly sea breeze and a long swell. One leg is upwind, with ships at anchor and a pilot boat. |
-| [`gibraltar-strait-sailing.toml`](scenarios/gibraltar-strait-sailing.toml) | A yacht crosses the Strait of Gibraltar to Ceuta in a strong levanter, through both traffic lanes, while the Atlantic inflow sets it east. |
 
 Depths and traffic are illustrative. **Do not use them for navigation.**
 

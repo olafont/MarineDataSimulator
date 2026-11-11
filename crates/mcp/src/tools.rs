@@ -961,9 +961,9 @@ mod tests {
     fn status_and_values() {
         let t = tools();
         let s = parse(t.get_status());
-        assert_eq!(s["scenario"], "Cape Canaveral sailing loop");
+        assert_eq!(s["scenario"], "Strait of Gibraltar crossing");
         assert_eq!(s["steering"]["mode"], "route");
-        assert!(s["vessel"]["position"]["lat"].as_f64().unwrap() > 28.0);
+        assert!(s["vessel"]["position"]["lat"].as_f64().unwrap() > 35.0);
         let v = parse(t.get_values(Parameters(GetValuesParams::default())));
         assert_eq!(v["environment"].as_array().unwrap().len(), EnvParam::COUNT);
         assert_eq!(v["instruments"].as_array().unwrap().len(), Channel::COUNT);

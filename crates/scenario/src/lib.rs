@@ -376,12 +376,12 @@ fn keys<'a>(it: impl Iterator<Item = &'a str>) -> String {
 
 /// Built-in scenarios: (file name, contents).
 pub const BUILTIN: &[(&str, &str)] = &[
+    ("gibraltar-strait-sailing.toml", include_str!("../../../scenarios/gibraltar-strait-sailing.toml")),
     ("cape-canaveral-sailing.toml", include_str!("../../../scenarios/cape-canaveral-sailing.toml")),
     ("marseille-sailing.toml", include_str!("../../../scenarios/marseille-sailing.toml")),
     ("channel-crossing-motor.toml", include_str!("../../../scenarios/channel-crossing-motor.toml")),
     ("singapore-strait-motor.toml", include_str!("../../../scenarios/singapore-strait-motor.toml")),
     ("long-beach-sailing.toml", include_str!("../../../scenarios/long-beach-sailing.toml")),
-    ("gibraltar-strait-sailing.toml", include_str!("../../../scenarios/gibraltar-strait-sailing.toml")),
 ];
 
 /// The scenario used when none is given.
@@ -497,7 +497,7 @@ mod tests {
 
     #[test]
     fn ais_targets_load_and_capture() {
-        let s = default_scenario();
+        let s = builtin("cape-canaveral-sailing.toml").unwrap();
         assert_eq!(s.ais.targets.len(), 7);
         assert!(s.sensors.iter().any(|c| c.kind == SensorKind::Ais));
         let mut sim = s.build_simulation(1_800_000_000.0);
