@@ -6,7 +6,7 @@
 #   scripts/build-macos-app.sh --no-dmg     # skip the disk image
 #
 # The app is signed ad hoc (no Apple Developer ID): it runs on this Mac, and on other Macs
-# after right-click → Open the first time (see docs/USER_MANUAL.md, "macOS app").
+# after "Open Anyway" in System Settings the first time (see docs/USER_MANUAL.md, "Install").
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
