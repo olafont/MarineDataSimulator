@@ -38,11 +38,21 @@ pub(super) struct Prefs {
     pub mcp_port: u16,
     /// Scenario files saved or opened in the app, listed after the built-in ones.
     pub scenarios: Vec<PathBuf>,
+    /// The scenario last chosen in the app, opened again at the next start.
+    pub last_scenario: Option<LastScenario>,
+}
+
+/// A scenario the user chose: a built-in one by file name, or a file of theirs.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum LastScenario {
+    Builtin(String),
+    File(PathBuf),
 }
 
 impl Default for Prefs {
     fn default() -> Self {
-        Self { palette: None, language: None, font_weight: FontWeight::default(), output_folder: default_output_folder(), mcp_enabled: false, mcp_port: mcp::DEFAULT_PORT, scenarios: vec![] }
+        Self { palette: None, language: None, font_weight: FontWeight::default(), output_folder: default_output_folder(), mcp_enabled: false, mcp_port: mcp::DEFAULT_PORT, scenarios: vec![], last_scenario: None }
     }
 }
 
@@ -112,12 +122,19 @@ impl SimApp {
         self.prefs.prefs.output_folder.clone()
     }
 
-    /// Adds a scenario file to the list in the Scenario tab, once.
+    /// Adds a scenario file to the list in the Scenario tab, once, and opens it at the next
+    /// start.
     pub(super) fn remember_scenario(&mut self, path: &Path) {
-        let list = &mut self.prefs.prefs.scenarios;
-        if !list.iter().any(|p| p == path) {
-            list.push(path.to_path_buf());
+        let p = &mut self.prefs.prefs;
+        if !p.scenarios.iter().any(|s| s == path) {
+            p.scenarios.push(path.to_path_buf());
         }
+        p.last_scenario = Some(LastScenario::File(path.to_path_buf()));
+    }
+
+    /// Opens this built-in scenario at the next start.
+    pub(super) fn remember_builtin(&mut self, file: &str) {
+        self.prefs.prefs.last_scenario = Some(LastScenario::Builtin(file.to_string()));
     }
 
     /// Takes a scenario file off that list.
@@ -258,7 +275,7 @@ mod tests {
         let dir = std::env::temp_dir().join(format!("marine-sim-prefs-{}", std::process::id()));
         let path = dir.join("preferences.toml");
         assert_eq!(read(&path).unwrap(), Prefs::default(), "no file: defaults");
-        let p = Prefs { palette: Some(Palette::Night), language: Some(Lang::French), font_weight: FontWeight::Medium, output_folder: dir.join("logs"), mcp_enabled: true, mcp_port: 12000, scenarios: vec![dir.join("my boat.toml")] };
+        let p = Prefs { palette: Some(Palette::Night), language: Some(Lang::French), font_weight: FontWeight::Medium, output_folder: dir.join("logs"), mcp_enabled: true, mcp_port: 12000, scenarios: vec![dir.join("my boat.toml")], last_scenario: Some(LastScenario::File(dir.join("my boat.toml"))) };
         write(&path, &p).unwrap();
         assert_eq!(read(&path).unwrap(), p);
         // A file from an older version, with fewer fields, still reads.
@@ -270,6 +287,10 @@ mod tests {
         assert_eq!(old.mcp_port, mcp::DEFAULT_PORT);
         assert!(old.scenarios.is_empty());
         assert_eq!(old.font_weight, FontWeight::Regular);
+        assert_eq!(old.last_scenario, None);
+        let builtin = Prefs { last_scenario: Some(LastScenario::Builtin("marseille-sailing.toml".into())), ..Prefs::default() };
+        write(&path, &builtin).unwrap();
+        assert_eq!(read(&path).unwrap(), builtin);
         std::fs::remove_dir_all(dir).unwrap();
     }
 }

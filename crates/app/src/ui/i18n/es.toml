@@ -103,6 +103,7 @@
 "Compass" = "Compás"
 "Constrained by draught" = "Restringido por su calado"
 "Copy" = "Copiar"
+"Could not open the scenario, so the default one is loaded: {e}" = "No se pudo abrir el escenario, así que se ha cargado el predeterminado: {e}"
 "Could not read the preferences: {e}" = "No se pudieron leer las preferencias: {e}"
 "Could not read the saved outputs in {path}: {e}" = "No se pudieron leer las salidas guardadas en {path}: {e}"
 "Could not save the outputs to {path}: {e}" = "No se pudieron guardar las salidas en {path}: {e}"

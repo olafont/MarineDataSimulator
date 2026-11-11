@@ -88,10 +88,15 @@ The software comes with no warranty (GPL-3.0, sections 15 and 16).
 
 ### First run
 
-The app opens on the built-in **Strait of Gibraltar** scenario: a 12 m sailing yacht crossing
-from Europa Point to Ceuta in a strong levanter, through both traffic lanes, with AIS traffic
-around it. It casts off at once and starts
-sending NMEA 0183 on two outputs:
+The first time, the app opens on the built-in **Strait of Gibraltar** scenario: a 12 m sailing
+yacht crossing from Europa Point to Ceuta in a strong levanter, through both traffic lanes, with
+AIS traffic around it. After that, it opens on the scenario you chose last: a built-in one, or a
+file you opened or saved (a scenario file given on the command line comes first). If that file
+has been moved or deleted, the app says so and opens the Strait of Gibraltar.
+
+The app always opens **paused**, so nothing moves until you press **▶ Run** (Home tab, or the
+title bar). While paused, each instrument sends its first reading once. Once running, the
+simulator sends NMEA 0183 on two outputs:
 
 - **TCP 10113**: a TCP server on port 10113. It listens on every network interface
   (`0.0.0.0`), so other computers on your network can connect too.

@@ -309,7 +309,10 @@ impl SimApp {
                     .on_hover_text(t!("Load a built-in scenario or one of yours"));
                 if let Some(file) = chosen_builtin {
                     match scenario::builtin(file) {
-                        Ok(s) => self.load(s, None),
+                        Ok(s) => {
+                            self.remember_builtin(file);
+                            self.load(s, None);
+                        }
                         Err(e) => self.fail(e),
                     }
                 }
@@ -318,7 +321,10 @@ impl SimApp {
                 }
                 if let Some(path) = chosen_file {
                     match scenario::Scenario::load(&path) {
-                        Ok(s) => self.load(s, Some(path)),
+                        Ok(s) => {
+                            self.remember_scenario(&path);
+                            self.load(s, Some(path));
+                        }
                         Err(e) => {
                             // A file that is gone leaves the list; one that does not load stays.
                             if !path.is_file() {

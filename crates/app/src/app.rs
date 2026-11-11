@@ -83,12 +83,18 @@ impl SteerMode {
 }
 
 impl SimApp {
-    pub fn new(cc: &eframe::CreationContext<'_>, scenario: Scenario, path: Option<PathBuf>) -> anyhow::Result<Self> {
+    /// Starts on the scenario file given on the command line, else on the scenario last chosen
+    /// in the app, else on the default one, always paused.
+    pub fn new(cc: &eframe::CreationContext<'_>, arg: Option<PathBuf>) -> anyhow::Result<Self> {
         theme::apply(&cc.egui_ctx);
-        let ctx = cc.egui_ctx.clone();
-        let engine = Arc::new(Engine::start(scenario.clone(), Some(Box::new(move || ctx.request_repaint())))?);
         let (prefs, prefs_error) = prefs::PrefsState::load();
         prefs.apply(&cc.egui_ctx);
+        let (scenario, path, scenario_error) = initial_scenario(arg.as_deref(), prefs.prefs.last_scenario.as_ref());
+        // The engine starts paused; the scenario keeps its own setting for Reset and Save as.
+        let mut paused = scenario.clone();
+        paused.simulation.paused = true;
+        let ctx = cc.egui_ctx.clone();
+        let engine = Arc::new(Engine::start(paused, Some(Box::new(move || ctx.request_repaint())))?);
         let mut app = Self {
             engine,
             chart: ChartView::new(&cc.egui_ctx),
@@ -105,8 +111,12 @@ impl SimApp {
             ribbon: ribbon::State { tab: ribbon_bar::Tab::Home, collapsed: false },
             panels: ribbon_bar::Panels::default(),
             reveal_outputs: false,
-            error: prefs_error,
+            error: prefs_error.or(scenario_error),
         };
+        if let Some(p) = &app.scenario_path {
+            let p = p.clone();
+            app.remember_scenario(&p);
+        }
         app.start_local_outputs();
         app.sync_agents(&cc.egui_ctx);
         Ok(app)
@@ -282,6 +292,21 @@ fn route_in(scenario: &Scenario) -> Steering {
     match &scenario.steering {
         r @ Steering::Route { .. } => r.clone(),
         _ => Steering::Route { waypoints: vec![], active: 0, looped: true, arrival_radius_m: 50.0 },
+    }
+}
+
+/// The scenario to start on, its file, and why the one asked for could not be opened.
+fn initial_scenario(arg: Option<&std::path::Path>, last: Option<&prefs::LastScenario>) -> (Scenario, Option<PathBuf>, Option<String>) {
+    let default = || engine::scenario::default_scenario();
+    let opened = match (arg, last) {
+        (Some(p), _) => Scenario::load(p).map(|s| (s, Some(p.to_path_buf()))),
+        (None, Some(prefs::LastScenario::File(p))) => Scenario::load(p).map(|s| (s, Some(p.clone()))),
+        (None, Some(prefs::LastScenario::Builtin(name))) => engine::scenario::builtin(name).map(|s| (s, None)),
+        (None, None) => return (default(), None, None),
+    };
+    match opened {
+        Ok((s, p)) => (s, p, None),
+        Err(e) => (default(), None, Some(crate::tf!("Could not open the scenario, so the default one is loaded: {e}", e = format!("{e:#}")))),
     }
 }
 

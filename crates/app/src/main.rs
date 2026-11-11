@@ -6,7 +6,6 @@ mod ui;
 
 use std::path::PathBuf;
 
-use engine::scenario::{self, Scenario};
 
 fn main() -> eframe::Result {
     tracing_subscriber::fmt()
@@ -15,18 +14,8 @@ fn main() -> eframe::Result {
         )
         .init();
 
-    // Optional first argument: a scenario file.
+    // Optional first argument: a scenario file (else the app reopens the last one chosen).
     let path = std::env::args().nth(1).map(PathBuf::from);
-    let (sc, path) = match &path {
-        Some(p) => match Scenario::load(p) {
-            Ok(s) => (s, path),
-            Err(e) => {
-                eprintln!("{e:#}\nfalling back to the built-in scenario");
-                (scenario::default_scenario(), None)
-            }
-        },
-        None => (scenario::default_scenario(), None),
-    };
 
     let mut viewport = ui::title_bar::viewport(egui::ViewportBuilder::default());
     match eframe::icon_data::from_png_bytes(include_bytes!("../../../assets/icon.png")) {
@@ -43,6 +32,6 @@ fn main() -> eframe::Result {
     eframe::run_native(
         "marine-data-simulator",
         options,
-        Box::new(move |cc| Ok(Box::new(app::SimApp::new(cc, sc, path)?))),
+        Box::new(move |cc| Ok(Box::new(app::SimApp::new(cc, path)?))),
     )
 }

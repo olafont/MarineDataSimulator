@@ -44,8 +44,8 @@ To build from source, see [Quick start](#quick-start).
 
 ## Quick start
 
-
-On start, the simulator serves data on **TCP port 10113** (all interfaces) and sends it by
+The app opens paused, on the scenario you chose last (the Strait of Gibraltar the first time):
+press **▶ Run** to start. It serves data on **TCP port 10113** (all interfaces) and sends it by
 **UDP to 127.0.0.1:10113**. In OpenCPN, add a network connection with protocol TCP, address
 `localhost` and port `10113`. The boat and the AIS traffic appear on the chart.
 
