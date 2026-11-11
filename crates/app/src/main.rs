@@ -14,6 +14,9 @@ fn main() -> eframe::Result {
         )
         .init();
 
+    #[cfg(target_os = "macos")]
+    name_process();
+
     // Optional first argument: a scenario file (else the app reopens the last one chosen).
     let path = std::env::args().nth(1).map(PathBuf::from);
 
@@ -34,4 +37,13 @@ fn main() -> eframe::Result {
         options,
         Box::new(move |cc| Ok(Box::new(app::SimApp::new(cc, path)?))),
     )
+}
+
+/// macOS builds the app menu ("About …", "Hide …", "Quit …") from the process name. Inside the
+/// .app bundle that is the app's name already; run as a plain binary (`cargo run`), it would be
+/// `marine-sim`.
+#[cfg(target_os = "macos")]
+fn name_process() {
+    use objc2_foundation::{NSProcessInfo, NSString};
+    NSProcessInfo::processInfo().setProcessName(&NSString::from_str("Marine Data Simulator"));
 }
