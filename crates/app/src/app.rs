@@ -10,6 +10,7 @@
 //! This file holds the window state and the commands that both the ribbon and the panels use.
 
 use std::path::PathBuf;
+use std::sync::Arc;
 
 use egui::{ScrollArea, Ui};
 use engine::scenario::Scenario;
@@ -23,6 +24,7 @@ use crate::ui::widgets::Edits;
 use crate::ui::{ribbon, theme, title_bar};
 use crate::t;
 
+mod agents;
 mod ais_panel;
 mod controls;
 mod local_outputs;
@@ -39,7 +41,8 @@ const TITLE_BAR_HEIGHT: f32 = 32.0;
 const REPLAY_SPEEDS: &[f64] = &[0.5, 1.0, 2.0, 5.0, 10.0, 30.0, 60.0];
 
 pub struct SimApp {
-    engine: Engine,
+    /// Shared with the MCP server, when it runs.
+    engine: Arc<Engine>,
     chart: ChartView,
     edits: Edits,
     /// Baseline used by "Reset".
@@ -49,6 +52,7 @@ pub struct SimApp {
     saved_route: Steering,
     output_editor: Option<outputs::OutputDraft>,
     prefs: prefs::PrefsState,
+    agents: agents::Agents,
     /// Outputs the user created, kept on this computer.
     local_outputs: local_outputs::LocalOutputs,
     monitor: monitor::MonitorState,
@@ -82,7 +86,7 @@ impl SimApp {
     pub fn new(cc: &eframe::CreationContext<'_>, scenario: Scenario, path: Option<PathBuf>) -> anyhow::Result<Self> {
         theme::apply(&cc.egui_ctx);
         let ctx = cc.egui_ctx.clone();
-        let engine = Engine::start(scenario.clone(), Some(Box::new(move || ctx.request_repaint())))?;
+        let engine = Arc::new(Engine::start(scenario.clone(), Some(Box::new(move || ctx.request_repaint())))?);
         let (prefs, prefs_error) = prefs::PrefsState::load();
         prefs.apply(&cc.egui_ctx);
         let mut app = Self {
@@ -94,6 +98,7 @@ impl SimApp {
             scenario_path: path,
             output_editor: None,
             prefs,
+            agents: agents::Agents::new(),
             local_outputs: local_outputs::LocalOutputs::new(),
             monitor: monitor::MonitorState::default(),
             ais: ais_panel::AisUi::default(),
@@ -103,6 +108,7 @@ impl SimApp {
             error: prefs_error,
         };
         app.start_local_outputs();
+        app.sync_agents(&cc.egui_ctx);
         Ok(app)
     }
 
@@ -144,6 +150,7 @@ impl SimApp {
             let captured = self.engine.capture_scenario();
             match captured.save(&path) {
                 Ok(()) => {
+                    self.engine.rebase(captured.clone());
                     self.scenario = captured;
                     self.scenario_path = Some(path);
                 }
@@ -309,6 +316,7 @@ fn steering_rows(f: &mut Form<'_>, edits: &mut Edits, sim: &Simulation, salt: &s
 
 impl eframe::App for SimApp {
     fn ui(&mut self, ui: &mut Ui, _frame: &mut eframe::Frame) {
+        self.handle_agent_events();
         let snap = self.engine.snapshot();
 
         if title_bar::integrated() {
@@ -361,6 +369,7 @@ impl eframe::App for SimApp {
         }
         self.prefs_window(ui.ctx());
         self.save_prefs_if_changed(ui.ctx());
+        self.sync_agents(ui.ctx());
 
         if let Some(err) = self.error.clone() {
             egui::Window::new(t!("Error")).collapsible(false).resizable(false).show(ui.ctx(), |ui| {

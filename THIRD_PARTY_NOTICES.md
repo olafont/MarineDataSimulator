@@ -40,7 +40,8 @@ SOFTWARE.
 ## Rust crates
 
 The app is built from Rust crates listed in `Cargo.lock`, among them egui and eframe (UI),
-walkers (map), tokio (networking), serialport, rfd (file dialogs), serde and toml. Their
+walkers (map), tokio (networking), serialport, rfd (file dialogs), rmcp and axum (MCP
+server), serde and toml. Their
 licenses are permissive: MIT, Apache-2.0 (some with the LLVM exception), BSD-2-Clause,
 BSD-3-Clause, ISC, Zlib, Unicode-3.0, BSL-1.0, MPL-2.0, CDLA-Permissive-2.0, 0BSD, CC0-1.0 or
 Unlicense; where a crate offers a choice, a permissive one is used. Each crate's license text

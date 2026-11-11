@@ -2,7 +2,7 @@
 #
 # Each key is the English text as written in the code (t!("…") or tf!("…")); the value is
 # what French shows. Placeholders such as {n} must be kept. A missing entry shows English;
-# `cargo test -p app every_string_has_a_french_entry` lists them.
+# `cargo test -p app every_string_is_translated` lists them.
 #
 # Units stay international (kn, nm, m, °T), as in the number fields.
 
@@ -29,15 +29,18 @@
 "Add waypoint here" = "Ajouter un point de route ici"
 "Add waypoint to {name}'s route" = "Ajouter un point à la route de {name}"
 "Add waypoints" = "Ajouter des points"
+"Address" = "Adresse"
 "Adds a file output with TAG-block timestamps, for replay" = "Ajoute une sortie fichier horodatée (blocs TAG), pour la relecture"
 "Aground" = "Échoué"
 "AGROUND" = "ÉCHOUÉ"
+"AI agents" = "Agents IA"
 "Air temperature" = "Température de l'air"
 "AIS ({n} targets)" = "AIS ({n} cibles)"
 "AIS traffic" = "Trafic AIS"
 "AIS transponder" = "Transpondeur AIS"
 "AIS-SART active" = "AIS-SART actif"
 "all, or {tags}" = "toutes, ou {tags}"
+"An MCP server lets AI agents such as Claude watch and drive the simulation. Only programs on this computer can connect." = "Un serveur MCP permet à des agents IA comme Claude d'observer et de piloter la simulation. Seuls les programmes de cet ordinateur peuvent s'y connecter."
 "Antenna altitude" = "Altitude de l'antenne"
 "Antenna to bow/stern" = "Antenne – étrave/poupe"
 "Antenna to port/stbd" = "Antenne – bâbord/tribord"
@@ -100,10 +103,12 @@
 "Comes from" = "Vient du"
 "Compass" = "Compas"
 "Constrained by draught" = "Handicapé par son tirant d'eau"
+"Copy" = "Copier"
 "Could not read the preferences: {e}" = "Impossible de lire les préférences : {e}"
 "Could not read the saved outputs in {path}: {e}" = "Impossible de lire les sorties enregistrées dans {path} : {e}"
 "Could not save the outputs to {path}: {e}" = "Impossible d'enregistrer les sorties dans {path} : {e}"
 "Could not save the preferences to {path}: {e}" = "Impossible d'enregistrer les préférences dans {path} : {e}"
+"Could not start: {e}" = "Démarrage impossible : {e}"
 "Course" = "Route"
 "Course over ground" = "Route fond"
 "CS unit" = "Unité CS"
@@ -180,6 +185,7 @@
 "Leeway (+to stbd)" = "Dérive (+vers tribord)"
 "Leeway coefficient" = "Coefficient de dérive"
 "Length" = "Longueur"
+"Let agents connect" = "Autoriser les agents à se connecter"
 "Light vessel / LANBY / rig" = "Bateau-feu / LANBY / plateforme"
 "Light, for daylight" = "Clair, pour le plein jour"
 "Light, without sectors" = "Feu, sans secteurs"
@@ -187,6 +193,7 @@
 "lines" = "lignes"
 "Listen on" = "Écoute sur"
 "live" = "réel"
+"Load a built-in scenario" = "Charger un scénario intégré"
 "Load…" = "Charger…"
 "Longitude" = "Longitude"
 "Loop" = "Boucle"
@@ -197,6 +204,7 @@
 "Max rate of turn" = "Taux de giration max"
 "Max rpm" = "Régime max"
 "Max stream" = "Courant max"
+"MCP server" = "Serveur MCP"
 "Medical transport" = "Transport médical"
 "Meets own ship in" = "Rejoint le navire dans"
 "Message 19" = "Message 19"

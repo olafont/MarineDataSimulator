@@ -55,7 +55,8 @@ done
 iconutil -c icns "$ICONSET" -o "$APP/Contents/Resources/AppIcon.icns"
 
 # 3. Bundle.
-cp "$EXE" "$APP/Contents/MacOS/$BIN"
+# The executable carries the app's name: the menu bar's "About", "Hide" and "Quit" items show it.
+cp "$EXE" "$APP/Contents/MacOS/$NAME"
 cat > "$APP/Contents/Info.plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -64,7 +65,7 @@ cat > "$APP/Contents/Info.plist" <<EOF
   <key>CFBundleName</key>                <string>$NAME</string>
   <key>CFBundleDisplayName</key>         <string>$NAME</string>
   <key>CFBundleIdentifier</key>          <string>$BUNDLE_ID</string>
-  <key>CFBundleExecutable</key>          <string>$BIN</string>
+  <key>CFBundleExecutable</key>          <string>$NAME</string>
   <key>CFBundleIconFile</key>            <string>AppIcon</string>
   <key>CFBundlePackageType</key>         <string>APPL</string>
   <key>CFBundleShortVersionString</key>  <string>$VERSION</string>

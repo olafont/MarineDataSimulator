@@ -31,11 +31,14 @@ pub(super) struct Prefs {
     pub language: Option<Lang>,
     /// Where recordings and file outputs go, and where logs to replay are looked for.
     pub output_folder: PathBuf,
+    /// Serve the Model Context Protocol to AI agents on this computer (off unless asked for).
+    pub mcp_enabled: bool,
+    pub mcp_port: u16,
 }
 
 impl Default for Prefs {
     fn default() -> Self {
-        Self { palette: None, language: None, output_folder: default_output_folder() }
+        Self { palette: None, language: None, output_folder: default_output_folder(), mcp_enabled: false, mcp_port: mcp::DEFAULT_PORT }
     }
 }
 
@@ -64,7 +67,7 @@ fn write(path: &Path, prefs: &Prefs) -> anyhow::Result<()> {
 
 /// The Preferences window's size, centred on the main window.
 const PREFS_WIDTH: f32 = 640.0;
-const PREFS_HEIGHT: f32 = 420.0;
+const PREFS_HEIGHT: f32 = 560.0;
 
 /// The preferences, as last written, and whether the Preferences window is open.
 pub(super) struct PrefsState {
@@ -187,6 +190,13 @@ impl SimApp {
             });
         });
 
+        ui.add_space(t.space_lg);
+        ui.separator();
+        ui.add_space(t.space_lg);
+
+        heading(ui, t!("AI agents"), t!("An MCP server lets AI agents such as Claude watch and drive the simulation. Only programs on this computer can connect."));
+        form(ui, "prefs_agents", |f| self.agents_form(f));
+
         // Footer: where this is kept, and Done.
         ui.with_layout(egui::Layout::bottom_up(egui::Align::Min), |ui| {
             ui.horizontal(|ui| {
@@ -213,7 +223,7 @@ mod tests {
         let dir = std::env::temp_dir().join(format!("marine-sim-prefs-{}", std::process::id()));
         let path = dir.join("preferences.toml");
         assert_eq!(read(&path).unwrap(), Prefs::default(), "no file: defaults");
-        let p = Prefs { palette: Some(Palette::Night), language: Some(Lang::French), output_folder: dir.join("logs") };
+        let p = Prefs { palette: Some(Palette::Night), language: Some(Lang::French), output_folder: dir.join("logs"), mcp_enabled: true, mcp_port: 12000 };
         write(&path, &p).unwrap();
         assert_eq!(read(&path).unwrap(), p);
         // A file from an older version, with fewer fields, still reads.
@@ -221,6 +231,8 @@ mod tests {
         let old = read(&path).unwrap();
         assert_eq!(old.palette, Some(Palette::Day));
         assert_eq!(old.output_folder, default_output_folder());
+        assert!(!old.mcp_enabled, "the MCP server is off unless asked for");
+        assert_eq!(old.mcp_port, mcp::DEFAULT_PORT);
         std::fs::remove_dir_all(dir).unwrap();
     }
 }

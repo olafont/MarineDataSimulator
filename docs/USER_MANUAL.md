@@ -28,10 +28,11 @@ The rest is reference, to open when you need it.
 11. [Command line (CLI)](#11-command-line-cli)
 12. [Scenario files](#12-scenario-files)
 13. [Connecting other software](#13-connecting-other-software)
-14. [Troubleshooting](#14-troubleshooting)
+14. [AI agents (MCP)](#14-ai-agents-mcp)
+15. [Troubleshooting](#15-troubleshooting)
 
 The names of menus and buttons are written here as the English interface shows them. The app
-also speaks French ([section 10](#10-preferences-and-saved-settings)).
+also speaks French and German ([section 10](#10-preferences-and-saved-settings)).
 
 ---
 
@@ -217,7 +218,7 @@ keep only the tabs; click any tab to show them again.
 | | Steering | **Heading**, **Wind angle**, **Route** |
 | | Propulsion | **Engine** on or off (sailing vessels only) |
 | **Scenario** | File | **Open…** a scenario file, **Save as…** the current state, **Reset** to the scenario's initial state |
-| | Built-in scenarios | **cape canaveral sailing**, **marseille sailing**, **channel crossing motor**, **singapore strait motor**, **long beach sailing**, **gibraltar strait sailing** |
+| | Built-in scenarios | **Scenario** list: *Cape Canaveral sailing loop*, *Marseille sailing loop*, *Channel crossing (motor, tidal)*, *Singapore Strait (motor)*, *Long Beach sailing loop*, *Strait of Gibraltar crossing*. Choosing one loads it. |
 | **Chart** | Route | **Add waypoints** by clicking the chart, **Clear route** |
 | | Display | **Seamarks** overlay on or off, **Clear track** |
 | **AIS traffic** | Add | The **Class** of new targets; add a **Target**, a **Collision** course target or **Random** traffic |
@@ -287,7 +288,8 @@ Chart tiles come from the internet; tiles already seen are kept on disk and work
 ### Traffic monitor
 
 The monitor shows the most recent lines in the format chosen at its left: NMEA 0183, one of
-the NMEA 2000 formats or Signal K. It can show a format even when no output uses it. Each line
+the NMEA 2000 formats or Signal K. It can show a format even when no output uses it. (An AI
+agent that reads another format changes this choice: [section 14](#14-ai-agents-mcp).) Each line
 has three columns:
 
 1. The **source**: the sensor that produced it, *Vessel* (the Signal K identity) or *Replay*.
@@ -761,8 +763,9 @@ Windows and Linux).
 | Preference | Effect |
 |---|---|
 | **Palette** | Day, Dusk or Night (also on the **View** tab). Until you pick one, the app follows the system's light or dark mode. |
-| **Language** | English or Français. It changes at once; until you pick one, the app follows the system's language. Units (kn, nm, °) and the data sent are the same in every language. |
+| **Language** | English, Français or Deutsch. It changes at once; until you pick one, the app follows the system's language. Units (kn, nm, °) and the data sent are the same in every language. |
 | **Output folder** | Where recordings and new file outputs are written, and where **Open log…** starts. **Choose…** picks another folder; **Default** goes back to your Documents folder. |
+| **MCP server** | **Let agents connect** starts a server through which AI agents can watch and drive the simulation, on the **Port** below (10115 unless you change it). Off until you tick it. See [section 14](#14-ai-agents-mcp). |
 
 Changes apply and are saved at once; **Done** closes the window. The bottom of the window
 shows where the preferences file is kept.
@@ -812,6 +815,8 @@ cargo run --release -p cli -- [OPTIONS]
 | `--replay-speed X` | Replay speed (default 1) |
 | `--replay-loop` | Loop the log |
 | `--exit-after-replay` | Exit when the log ends |
+| `--mcp-port PORT` | Let AI agents connect at `http://127.0.0.1:PORT/mcp` ([section 14](#14-ai-agents-mcp)) |
+| `--mcp-stdio` | Talk to an AI agent on stdin and stdout, for an agent that starts the program itself; runs until the agent closes them (not together with `--print`, `--duration` or `--mcp-port`) |
 | `--write-default-scenario PATH` | Write the default scenario to PATH and exit, as a starting point for your own |
 
 Log messages go to stderr; set `RUST_LOG=debug` for more detail.
@@ -1005,7 +1010,71 @@ nc -ul 10113                # UDP: listen for datagrams (stop other listeners on
 
 ---
 
-## 14. Troubleshooting
+## 14. AI agents (MCP)
+
+An AI agent such as Claude can watch and drive the simulator through the
+[Model Context Protocol](https://modelcontextprotocol.io) (MCP). You can then ask in plain
+words: "load the Gibraltar scenario, put a ship on a collision course from the starboard bow and
+tell me what the AIS sentences say", or have an agent set up the conditions that the software
+you are testing must handle.
+
+### Switching it on
+
+| You run | Do this | The agent connects to |
+|---|---|---|
+| The app | **Preferences › AI agents**: tick **Let agents connect** | `http://127.0.0.1:10115/mcp` (shown in Preferences, with a **Copy** button) |
+| The CLI, already running | Start it with `--mcp-port 10115` | `http://127.0.0.1:10115/mcp` |
+| Nothing: the agent starts the simulator | Give the agent the command `marine-sim-cli --mcp-stdio` | The program's stdin and stdout |
+
+For example, with Claude Code:
+
+```sh
+claude mcp add --transport http marine-sim http://127.0.0.1:10115/mcp    # the running app
+claude mcp add marine-sim -- /path/to/marine-sim-cli --mcp-stdio         # or headless
+```
+
+Other MCP clients take the same address, or the same command, in their own settings.
+
+### What an agent can do
+
+| Tools | What they do |
+|---|---|
+| `get_status`, `get_values` | Read the state: time, position, heading, speeds, depth, wind, steering, and every environment and instrument value with its override |
+| `set_simulation` | Pause, resume, change the time scale |
+| `steer`, `set_propulsion`, `move_vessel` | Hold a heading or a wind angle, follow a route, start the engine, set the speed, put the vessel somewhere else |
+| `set_environment`, `set_override` | Change the wind, current, depth and the rest; replace, offset or freeze any value ([section 6](#6-overrides)) |
+| `list_ais_targets`, `add_ais_target`, `add_collision_target`, `update_ais_target`, `remove_ais_targets` | Manage the AIS traffic, with range, bearing, CPA and TCPA of each target |
+| `list_scenarios`, `load_scenario`, `get_scenario`, `reset_scenario` | Load a built-in scenario or one given as TOML text, read the current state as a scenario, reset |
+| `list_sensors`, `set_sensor` | Switch an instrument off, change its rate, add errors |
+| `list_outputs`, `add_output`, `remove_output` | See and manage the network outputs |
+| `read_data` | Read the lines being sent, filtered by type or text: NMEA 0183 (with AIS), NMEA 2000 in any of its three text formats, or Signal K |
+
+What an agent does shows in the app at once, as if you had done it yourself, and you can take
+over at any moment. Each change is in force when the tool answers, so an agent can check its
+result with the very next call.
+
+`read_data` reads from the [traffic monitor](#traffic-monitor), which holds one format at a
+time. When an agent asks for another format, the monitor switches to it, in the app too, and
+starts afresh: the first answer holds only the lines sent since the switch.
+
+### Limits, on purpose
+
+- **This computer only.** The server listens on 127.0.0.1, and refuses requests that come from
+  a web page. Anything that can run programs on your computer can connect while it is on, so it
+  is off until you switch it on.
+- **No files.** Through MCP the simulator neither reads nor writes files: a scenario that
+  names a polar or soundings file is refused, and so are file and serial outputs. Use the app or
+  the CLI for those.
+- **Made-up identities.** New AIS targets get an MMSI that cannot belong to a real ship; an agent
+  that sets a real-looking one gets a warning. The [safety rules](#safety-and-responsible-use)
+  apply to agents as they do to you.
+- Outputs an agent adds last until the next scenario is loaded; they are not kept in
+  `outputs.toml`.
+- Replay and recording are not available to agents.
+
+---
+
+## 15. Troubleshooting
 
 | Symptom | Cause and fix |
 |---|---|
@@ -1027,6 +1096,8 @@ nc -ul 10113                # UDP: listen for datagrams (stop other listeners on
 | Nothing but the log is sent during a replay | **Mute simulated data while a log is loaded** is on. Untick it, or **Close** the log. |
 | Chart tiles do not load | The chart needs internet access. Tiles already loaded are cached and still work offline. |
 | The scenario will not load | The error names the line and key. Unknown keys and wrong types are rejected. |
+| The monitor changed format by itself | An AI agent read the data in another format ([section 14](#14-ai-agents-mcp)). Choose the format again at the left of the monitor. |
+| An AI agent cannot connect | Is **Let agents connect** ticked in Preferences, and is the address the one shown there? "Could not start" under it means another program holds the port: change the **Port**. The agent must run on this computer. |
 
 Fair winds, and may all your groundings be simulated.
 

@@ -20,6 +20,20 @@ use crate::ui::widgets::format_time;
 use crate::t;
 use crate::ui::i18n::tr;
 
+/// The built-in scenarios as (file name, title from the scenario's `name`), read once.
+fn builtin_titles() -> &'static [(&'static str, String)] {
+    static TITLES: std::sync::OnceLock<Vec<(&'static str, String)>> = std::sync::OnceLock::new();
+    TITLES.get_or_init(|| {
+        scenario::BUILTIN
+            .iter()
+            .map(|(file, _)| {
+                let title = scenario::builtin(file).map_or_else(|_| file.trim_end_matches(".toml").into(), |s| s.name);
+                (*file, title)
+            })
+            .collect()
+    })
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Tab {
     Home,
@@ -243,15 +257,33 @@ impl SimApp {
             }
         });
         group(ui, t!("Built-in scenarios"), |ui| {
-            for (name, _) in scenario::BUILTIN {
-                let label = name.trim_end_matches(".toml").replace('-', " ");
-                if big(ui, Icon::teal("🗺"), &label).on_hover_text(*name).clicked() {
-                    match scenario::builtin(name) {
+            column(ui, |ui| {
+                ui.weak(t!("Scenario"));
+                // The loaded scenario, when it is an unchanged built-in one.
+                let current = builtin_titles()
+                    .iter()
+                    .find(|(_, title)| self.scenario_path.is_none() && *title == self.scenario.name);
+                let mut chosen = None;
+                ComboBox::from_id_salt("ribbon_builtin_scenario")
+                    .width(tokens(ui).field_long)
+                    .selected_text(current.map_or(t!("Choose…"), |(_, title)| title.as_str()))
+                    .show_ui(ui, |ui| {
+                        for (file, title) in builtin_titles() {
+                            let on = current.is_some_and(|(f, _)| f == file);
+                            if ui.selectable_label(on, title).on_hover_text(*file).clicked() {
+                                chosen = Some(*file);
+                            }
+                        }
+                    })
+                    .response
+                    .on_hover_text(t!("Load a built-in scenario"));
+                if let Some(file) = chosen {
+                    match scenario::builtin(file) {
                         Ok(s) => self.load(s, None),
                         Err(e) => self.fail(e),
                     }
                 }
-            }
+            });
         });
     }
 
@@ -549,6 +581,8 @@ mod tests {
             include_str!("../ui/form.rs"),
             include_str!("../ui/ribbon.rs"),
             include_str!("../ui/widgets.rs"),
+            include_str!("../ui/i18n/fr.toml"),
+            include_str!("../ui/i18n/de.toml"),
         ];
         let ctx = egui::Context::default();
         let mut out = ctx.run_ui(egui::RawInput::default(), |_| {});

@@ -15,6 +15,7 @@ protocols = { path = "crates/protocols" }
 transports = { path = "crates/transports" }
 scenario = { path = "crates/scenario" }
 engine = { path = "crates/engine" }
+mcp = { path = "crates/mcp" }
 
 anyhow = "1"
 arc-swap = "1.9"

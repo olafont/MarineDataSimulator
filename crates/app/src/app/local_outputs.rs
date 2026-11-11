@@ -8,7 +8,7 @@
 use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
-use engine::transports::OutputConfig;
+use engine::transports::{OutputConfig, OutputManager};
 use serde::{Deserialize, Serialize};
 
 use super::SimApp;
@@ -21,9 +21,27 @@ pub(super) struct LocalOutputs {
     ids: HashSet<u64>,
 }
 
+/// Where the kept outputs are; `None` when the system has no config folder.
+pub(super) fn file_path() -> Option<PathBuf> {
+    super::prefs::config_file("outputs.toml")
+}
+
+/// Starts the kept outputs, except those already running (a scenario saved with "Save as"
+/// contains them), and returns their ids. Also used when an agent loads a scenario, without
+/// waiting for the window.
+pub(super) fn start_saved(outputs: &OutputManager, path: &Path) -> anyhow::Result<HashSet<u64>> {
+    let running = outputs.configs();
+    Ok(read(path)?.into_iter().filter(|c| !running.contains(c)).map(|c| outputs.add(c)).collect())
+}
+
 impl LocalOutputs {
     pub(super) fn new() -> Self {
-        Self { path: super::prefs::config_file("outputs.toml"), ids: HashSet::new() }
+        Self { path: file_path(), ids: HashSet::new() }
+    }
+
+    /// The kept outputs were started elsewhere (see [`start_saved`]).
+    pub(super) fn adopt(&mut self, ids: HashSet<u64>) {
+        self.ids = ids;
     }
 
     pub(super) fn contains(&self, id: u64) -> bool {
@@ -63,14 +81,8 @@ impl SimApp {
     pub(super) fn start_local_outputs(&mut self) {
         self.local_outputs.ids.clear();
         let Some(path) = self.local_outputs.path.clone() else { return };
-        match read(&path) {
-            Ok(saved) => {
-                let running = self.engine.outputs().configs();
-                for cfg in saved.into_iter().filter(|c| !running.contains(c)) {
-                    let id = self.engine.outputs().add(cfg);
-                    self.local_outputs.ids.insert(id);
-                }
-            }
+        match start_saved(self.engine.outputs(), &path) {
+            Ok(ids) => self.local_outputs.ids = ids,
             Err(e) => self.fail(crate::tf!("Could not read the saved outputs in {path}: {e}", path = path.display(), e = format!("{e:#}"))),
         }
     }

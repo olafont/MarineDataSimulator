@@ -1,8 +1,9 @@
 //! Languages of the user interface.
 //!
 //! The code is written in English and the English text is the key: `t!("Pause")` shows "Pause"
-//! in English and the French entry of `i18n/fr.toml` in French. A missing entry shows the
-//! English text (the `every_string_has_a_french_entry` test keeps the catalog complete).
+//! in English and its entry of `i18n/fr.toml` or `i18n/de.toml` in French or German. A missing
+//! entry shows the English text (the `every_string_is_translated` test keeps the catalogs
+//! complete).
 //!
 //! Text with values uses named placeholders, filled after translation, so a translation can
 //! move them: `tf!("{n} targets", n = count)`.
@@ -20,24 +21,30 @@ use serde::{Deserialize, Serialize};
 pub enum Lang {
     English,
     French,
+    German,
 }
 
 impl Lang {
-    pub const ALL: [Lang; 2] = [Lang::English, Lang::French];
+    pub const ALL: [Lang; 3] = [Lang::English, Lang::French, Lang::German];
 
     /// The language's own name, as a language menu shows it.
     pub fn name(self) -> &'static str {
         match self {
             Lang::English => "English",
             Lang::French => "Français",
+            Lang::German => "Deutsch",
         }
     }
 
     /// The system's language, when it is one of ours (else English).
     pub fn system() -> Lang {
-        match sys_locale::get_locale() {
-            Some(l) if l.to_ascii_lowercase().starts_with("fr") => Lang::French,
-            _ => Lang::English,
+        let locale = sys_locale::get_locale().unwrap_or_default().to_ascii_lowercase();
+        if locale.starts_with("fr") {
+            Lang::French
+        } else if locale.starts_with("de") {
+            Lang::German
+        } else {
+            Lang::English
         }
     }
 }
@@ -47,6 +54,7 @@ static LANG: AtomicU8 = AtomicU8::new(0);
 pub fn lang() -> Lang {
     match LANG.load(Ordering::Relaxed) {
         1 => Lang::French,
+        2 => Lang::German,
         _ => Lang::English,
     }
 }
@@ -55,28 +63,27 @@ pub fn set_lang(l: Lang) {
     LANG.store(l as u8, Ordering::Relaxed);
 }
 
-const FRENCH: &str = include_str!("i18n/fr.toml");
+type Catalog = HashMap<String, String>;
 
-/// The French catalog, read once.
-fn french() -> &'static HashMap<String, String> {
-    static CATALOG: OnceLock<HashMap<String, String>> = OnceLock::new();
-    CATALOG.get_or_init(|| toml::from_str(FRENCH).expect("i18n/fr.toml is valid TOML"))
+/// The catalog of a language other than English, read once.
+fn catalog(l: Lang) -> Option<&'static Catalog> {
+    static FRENCH: OnceLock<Catalog> = OnceLock::new();
+    static GERMAN: OnceLock<Catalog> = OnceLock::new();
+    match l {
+        Lang::English => None,
+        Lang::French => Some(FRENCH.get_or_init(|| toml::from_str(include_str!("i18n/fr.toml")).expect("i18n/fr.toml is valid TOML"))),
+        Lang::German => Some(GERMAN.get_or_init(|| toml::from_str(include_str!("i18n/de.toml")).expect("i18n/de.toml is valid TOML"))),
+    }
 }
 
 /// `s` in the current language.
 pub fn t(s: &'static str) -> &'static str {
-    match lang() {
-        Lang::English => s,
-        Lang::French => french().get(s).map_or(s, String::as_str),
-    }
+    catalog(lang()).and_then(|c| c.get(s)).map_or(s, String::as_str)
 }
 
 /// `s` in the current language, for text that is not a literal (labels from the engine).
 pub fn tr(s: &str) -> String {
-    match lang() {
-        Lang::English => s.to_string(),
-        Lang::French => french().get(s).cloned().unwrap_or_else(|| s.to_string()),
-    }
+    catalog(lang()).and_then(|c| c.get(s)).cloned().unwrap_or_else(|| s.to_string())
 }
 
 /// Fills `{name}` placeholders of a translated template.
@@ -117,37 +124,44 @@ mod tests {
         assert_eq!(t("Preferences"), "Préférences");
         assert_eq!(t("not in the catalog"), "not in the catalog");
         assert_eq!(tf!("{n} targets", n = 3), "3 cibles");
+        set_lang(Lang::German);
+        assert_eq!(t("Preferences"), "Einstellungen");
+        assert_eq!(tf!("{n} targets", n = 3), "3 Ziele");
+        assert_eq!(tr("not in the catalog"), "not in the catalog");
         set_lang(Lang::English);
         assert_eq!(t("Preferences"), "Preferences");
         assert_eq!(tf!("{n} targets", n = 3), "3 targets");
     }
 
-    /// Every `t!("…")` and `tf!("…")` in the app's sources has a French entry, and
+    /// Every `t!("…")` and `tf!("…")` in the app's sources has an entry in every catalog, and
     /// every placeholder of a template is kept in its translation.
     #[test]
-    fn every_string_has_a_french_entry() {
-        let fr = french();
+    fn every_string_is_translated() {
         let mut missing = std::collections::BTreeSet::new();
-        for (file, src) in SOURCES {
-            for key in literal_args(src) {
-                match fr.get(&key) {
-                    None => {
-                        missing.insert(format!("{file}: {key:?}"));
-                    }
-                    Some(v) => {
-                        for p in placeholders(&key) {
-                            assert!(v.contains(&p), "{file}: {key:?} → {v:?} lost {p}");
+        for lang in Lang::ALL {
+            let Some(cat) = catalog(lang) else { continue };
+            let name = lang.name();
+            for (file, src) in SOURCES {
+                for key in literal_args(src) {
+                    match cat.get(&key) {
+                        None => {
+                            missing.insert(format!("{name}: {file}: {key:?}"));
+                        }
+                        Some(v) => {
+                            for p in placeholders(&key) {
+                                assert!(v.contains(&p), "{name}: {file}: {key:?} → {v:?} lost {p}");
+                            }
                         }
                     }
                 }
             }
-        }
-        for key in engine_labels() {
-            if !fr.contains_key(key) {
-                missing.insert(format!("engine label: {key:?}"));
+            for key in engine_labels() {
+                if !cat.contains_key(key) {
+                    missing.insert(format!("{name}: engine label: {key:?}"));
+                }
             }
         }
-        assert!(missing.is_empty(), "{} strings without a French entry:\n{}", missing.len(), missing.into_iter().collect::<Vec<_>>().join("\n"));
+        assert!(missing.is_empty(), "{} strings without a translation:\n{}", missing.len(), missing.into_iter().collect::<Vec<_>>().join("\n"));
     }
 
     /// The string literal that each `t!(` or `tf!(` starts with.

@@ -1,6 +1,8 @@
-//! Headless runner: loads a scenario, serves its outputs, optionally echoes sentences to stdout.
+//! Headless runner: loads a scenario, serves its outputs, optionally echoes sentences to stdout
+//! or serves the Model Context Protocol to AI agents.
 
 use std::path::PathBuf;
+use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use anyhow::Result;
@@ -47,6 +49,14 @@ struct Args {
     /// Stop when the replayed log ends.
     #[arg(long, requires = "replay")]
     exit_after_replay: bool,
+    /// Serve the Model Context Protocol on http://127.0.0.1:PORT/mcp, so that AI agents can
+    /// watch and drive the simulation.
+    #[arg(long, value_name = "PORT")]
+    mcp_port: Option<u16>,
+    /// Serve the Model Context Protocol on stdin/stdout (for an agent that starts this
+    /// program); runs until the agent closes them.
+    #[arg(long, conflicts_with_all = ["print", "mcp_port", "duration"])]
+    mcp_stdio: bool,
     /// Write the built-in scenario to this path and exit.
     #[arg(long, value_name = "PATH")]
     write_default_scenario: Option<PathBuf>,
@@ -106,7 +116,7 @@ fn main() -> Result<()> {
 
     let log = args.replay.as_deref().map(engine::read_log).transpose()?;
     let replaying = log.is_some();
-    let engine = Engine::start_with_replay(sc, None, log)?;
+    let engine = Arc::new(Engine::start_with_replay(sc, None, log)?);
     engine.monitor().lock().expect("monitor lock").view = args.print_format;
     if replaying {
         engine.replay(ReplayCommand::Speed(args.replay_speed));
@@ -121,6 +131,19 @@ fn main() -> Result<()> {
             s => tracing::info!("output `{}`: {} — {s:?}", o.config.name, o.config.kind.describe()),
         }
     }
+
+    let host: Arc<dyn mcp::Host> = Arc::new(mcp::EngineHost(engine.clone()));
+    if args.mcp_stdio {
+        return mcp::serve_stdio(host);
+    }
+    let _mcp = match args.mcp_port {
+        Some(port) => {
+            let server = mcp::McpServer::start_http(host, port)?;
+            eprintln!("MCP server: {}", server.url());
+            Some(server)
+        }
+        None => None,
+    };
 
     let started = Instant::now();
     let mut seen = 0u64;

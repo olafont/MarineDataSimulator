@@ -10,6 +10,7 @@
 | M5 | Serial, WebSocket, TCP client, file recording (TAG blocks) and replay; monitor shows routing | done |
 | M6 | NMEA 2000 (28 PGNs incl. AIS, address claim, fast packets) as Yacht Devices RAW, Actisense ASCII and canboat plain; Signal K deltas with hello and discovery; one data format per output | done |
 | M7 | Fault injection, scenario library, headless CI scenarios | |
+| M8 | MCP server: AI agents watch and drive the simulation (app: Streamable HTTP on localhost; CLI: HTTP or stdio) | done |
 
 ## M4: browser build (wasm), deferred
 

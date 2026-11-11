@@ -34,6 +34,9 @@ servers, instrument displays, data hubs, or software you are testing.
 - **Every common transport:** UDP, TCP server and client, WebSocket, serial port and file.
 - **Record and replay** NMEA logs, including logs from real boats.
 - **Headless CLI** for scripts and CI.
+- **AI agents** can watch and drive it through the Model Context Protocol (MCP).
+- **Six built-in scenarios**, from Cape Canaveral to the Strait of Gibraltar, and your own as TOML files.
+- **In English, French and German.**
 
 Runs on macOS, Windows and Linux.
 
@@ -81,9 +84,28 @@ cargo run --release -p cli -- --builtin marseille-sailing.toml --time-scale 10
 cargo run --release -p cli -- --record run.nmea          # also record everything to a file
 cargo run --release -p cli -- --replay run.nmea --replay-speed 10 --exit-after-replay
 cargo run --release -p cli -- --write-default-scenario my.toml
+cargo run --release -p cli -- --mcp-port 10115           # headless, AI agents connect over MCP
 ```
 
 See [the manual](docs/USER_MANUAL.md#11-command-line-cli) for all options.
+
+## AI agents (MCP)
+
+An AI agent such as Claude can drive the simulator through the
+[Model Context Protocol](https://modelcontextprotocol.io): read the state, steer, change the
+wind or the depth, override an instrument, add AIS traffic (including a ship on a collision
+course), load scenarios and read the data being sent, in any of its formats.
+
+```sh
+# The app: tick Preferences › AI agents › Let agents connect, then
+claude mcp add --transport http marine-sim http://127.0.0.1:10115/mcp
+
+# Headless: the agent starts the simulator itself
+claude mcp add marine-sim -- /path/to/marine-sim-cli --mcp-stdio
+```
+
+The server is off until you switch it on, listens on this computer only, and never reads or
+writes files. See [the manual](docs/USER_MANUAL.md#14-ai-agents-mcp) for the tools and limits.
 
 ## What it produces
 
@@ -147,6 +169,7 @@ crates/
   transports   UDP, TCP, WebSocket, serial and file outputs with sentence filters
   scenario     TOML scenario files
   engine       10 Hz simulation thread, snapshots, traffic monitor, replay
+  mcp          Model Context Protocol server: tools for AI agents (HTTP and stdio)
   app          egui desktop app (walkers map: OpenStreetMap + OpenSeaMap)
   cli          headless runner
 ```

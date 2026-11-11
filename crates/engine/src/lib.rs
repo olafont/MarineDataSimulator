@@ -270,6 +270,16 @@ impl Engine {
         *self.scenario.lock().expect("scenario lock") = scenario;
     }
 
+    /// The scenario last loaded (or adopted with [`Engine::rebase`]): what "Reset" goes back to.
+    pub fn scenario(&self) -> Scenario {
+        self.scenario.lock().expect("scenario lock").clone()
+    }
+
+    /// Makes `scenario` the baseline without touching the running state (after "Save as").
+    pub fn rebase(&self, scenario: Scenario) {
+        *self.scenario.lock().expect("scenario lock") = scenario;
+    }
+
     /// The current state as a scenario, suitable for saving.
     pub fn capture_scenario(&self) -> Scenario {
         let snap = self.snapshot();
