@@ -1,7 +1,8 @@
 //! Languages of the user interface.
 //!
 //! The code is written in English and the English text is the key: `t!("Pause")` shows "Pause"
-//! in English and its entry of `i18n/fr.toml` or `i18n/de.toml` in French or German. A missing
+//! in English and its entry of `i18n/fr.toml`, `i18n/de.toml` or `i18n/es.toml` in French, German
+//! or Spanish. A missing
 //! entry shows the English text (the `every_string_is_translated` test keeps the catalogs
 //! complete).
 //!
@@ -22,10 +23,11 @@ pub enum Lang {
     English,
     French,
     German,
+    Spanish,
 }
 
 impl Lang {
-    pub const ALL: [Lang; 3] = [Lang::English, Lang::French, Lang::German];
+    pub const ALL: [Lang; 4] = [Lang::English, Lang::French, Lang::German, Lang::Spanish];
 
     /// The language's own name, as a language menu shows it.
     pub fn name(self) -> &'static str {
@@ -33,6 +35,7 @@ impl Lang {
             Lang::English => "English",
             Lang::French => "Français",
             Lang::German => "Deutsch",
+            Lang::Spanish => "Español",
         }
     }
 
@@ -43,6 +46,8 @@ impl Lang {
             Lang::French
         } else if locale.starts_with("de") {
             Lang::German
+        } else if locale.starts_with("es") {
+            Lang::Spanish
         } else {
             Lang::English
         }
@@ -55,6 +60,7 @@ pub fn lang() -> Lang {
     match LANG.load(Ordering::Relaxed) {
         1 => Lang::French,
         2 => Lang::German,
+        3 => Lang::Spanish,
         _ => Lang::English,
     }
 }
@@ -69,10 +75,12 @@ type Catalog = HashMap<String, String>;
 fn catalog(l: Lang) -> Option<&'static Catalog> {
     static FRENCH: OnceLock<Catalog> = OnceLock::new();
     static GERMAN: OnceLock<Catalog> = OnceLock::new();
+    static SPANISH: OnceLock<Catalog> = OnceLock::new();
     match l {
         Lang::English => None,
         Lang::French => Some(FRENCH.get_or_init(|| toml::from_str(include_str!("i18n/fr.toml")).expect("i18n/fr.toml is valid TOML"))),
         Lang::German => Some(GERMAN.get_or_init(|| toml::from_str(include_str!("i18n/de.toml")).expect("i18n/de.toml is valid TOML"))),
+        Lang::Spanish => Some(SPANISH.get_or_init(|| toml::from_str(include_str!("i18n/es.toml")).expect("i18n/es.toml is valid TOML"))),
     }
 }
 
@@ -127,6 +135,9 @@ mod tests {
         set_lang(Lang::German);
         assert_eq!(t("Preferences"), "Einstellungen");
         assert_eq!(tf!("{n} targets", n = 3), "3 Ziele");
+        set_lang(Lang::Spanish);
+        assert_eq!(t("Preferences"), "Preferencias");
+        assert_eq!(tf!("{n} targets", n = 3), "3 blancos");
         assert_eq!(tr("not in the catalog"), "not in the catalog");
         set_lang(Lang::English);
         assert_eq!(t("Preferences"), "Preferences");

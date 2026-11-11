@@ -21,7 +21,7 @@ servers, instrument displays, data hubs, or software you are testing.
 - **Headless CLI** for scripts and CI.
 - **AI agents** can watch and drive it through the Model Context Protocol (MCP).
 - **Six built-in scenarios**, from Cape Canaveral to the Strait of Gibraltar, and your own as TOML files.
-- **In English, French and German.**
+- **In English, French, German and Spanish.**
 
 Runs on macOS, Windows and Linux.
 

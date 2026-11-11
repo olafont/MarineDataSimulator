@@ -32,7 +32,7 @@ The rest is reference, to open when you need it.
 15. [Troubleshooting](#15-troubleshooting)
 
 The names of menus and buttons are written here as the English interface shows them. The app
-also speaks French and German ([section 10](#10-preferences-and-saved-settings)).
+also speaks French, German and Spanish ([section 10](#10-preferences-and-saved-settings)).
 
 ---
 
@@ -218,7 +218,7 @@ keep only the tabs; click any tab to show them again.
 | | Steering | **Heading**, **Wind angle**, **Route** |
 | | Propulsion | **Engine** on or off (sailing vessels only) |
 | **Scenario** | File | **Open…** a scenario file, **Save as…** the current state, **Reset** to the scenario's initial state |
-| | Scenarios | **Scenario** list: the built-in *Strait of Gibraltar crossing*, *Cape Canaveral sailing loop*, *Marseille sailing loop*, *Channel crossing (motor, tidal)*, *Singapore Strait (motor)* and *Long Beach sailing loop*, then **My scenarios**: the files you saved with **Save as…** or opened with **Open…**, by file name. Choosing one loads it. A file that has been deleted or moved leaves the list. |
+| | Scenarios | **Scenario** list: the built-in *Strait of Gibraltar crossing*, *Cape Canaveral sailing loop*, *Marseille sailing loop*, *Channel crossing (motor, tidal)*, *Singapore Strait (motor)* and *Long Beach sailing loop*, then **My scenarios**: the files you saved with **Save as…** or opened with **Open…**, by file name. Choosing one loads it. **×** takes a file off the list without deleting it; a file that has been deleted or moved leaves the list by itself. |
 | **Chart** | Route | **Add waypoints** by clicking the chart, **Clear route** |
 | | Display | **Seamarks** overlay on or off, **Clear track** |
 | **AIS traffic** | Add | The **Class** of new targets; add a **Target**, a **Collision** course target or **Random** traffic |
@@ -763,7 +763,8 @@ Windows and Linux).
 | Preference | Effect |
 |---|---|
 | **Palette** | Day, Dusk or Night (also on the **View** tab). Until you pick one, the app follows the system's light or dark mode. |
-| **Language** | English, Français or Deutsch. It changes at once; until you pick one, the app follows the system's language. Units (kn, nm, °) and the data sent are the same in every language. |
+| **Language** | English, Français, Deutsch or Español. It changes at once; until you pick one, the app follows the system's language. Units (kn, nm, °) and the data sent are the same in every language. |
+| **Text weight** | Light, Regular or Medium: how heavy the interface's text is. Regular unless you change it. |
 | **Output folder** | Where recordings and new file outputs are written, and where **Open log…** starts. **Choose…** picks another folder; **Default** goes back to your Documents folder. |
 | **MCP server** | **Let agents connect** starts a server through which AI agents can watch and drive the simulation, on the **Port** below (10115 unless you change it). Off until you tick it. See [section 14](#14-ai-agents-mcp). |
 
@@ -774,7 +775,7 @@ The app keeps two files in your settings folder:
 
 | File | Holds |
 |---|---|
-| `preferences.toml` | The preferences above |
+| `preferences.toml` | The preferences above, and the list of your scenario files (**Scenario › My scenarios**) |
 | `outputs.toml` | The outputs you added ([section 9](#9-outputs-recording-and-replay)) |
 
 | System | Settings folder |

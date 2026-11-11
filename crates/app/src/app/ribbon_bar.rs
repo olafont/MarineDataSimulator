@@ -277,6 +277,7 @@ impl SimApp {
                 };
                 let mut chosen_builtin = None;
                 let mut chosen_file = None;
+                let mut removed_file = None;
                 ComboBox::from_id_salt("ribbon_builtin_scenario")
                     .width(tokens(ui).field_long)
                     .selected_text(selected)
@@ -291,11 +292,16 @@ impl SimApp {
                             ui.separator();
                             ui.weak(t!("My scenarios"));
                             for path in &saved {
-                                let on = current_file == Some(path);
-                                let label = ui.selectable_label(on, scenario_file_title(path));
-                                if label.on_hover_text(path.display().to_string()).clicked() {
-                                    chosen_file = Some(path.clone());
-                                }
+                                ui.horizontal(|ui| {
+                                    let on = current_file == Some(path);
+                                    let label = ui.selectable_label(on, scenario_file_title(path));
+                                    if label.on_hover_text(path.display().to_string()).clicked() {
+                                        chosen_file = Some(path.clone());
+                                    }
+                                    if ui.small_button("×").on_hover_text(t!("Remove from the list (the file is kept)")).clicked() {
+                                        removed_file = Some(path.clone());
+                                    }
+                                });
                             }
                         }
                     })
@@ -306,6 +312,9 @@ impl SimApp {
                         Ok(s) => self.load(s, None),
                         Err(e) => self.fail(e),
                     }
+                }
+                if let Some(path) = removed_file {
+                    self.forget_scenario(&path);
                 }
                 if let Some(path) = chosen_file {
                     match scenario::Scenario::load(&path) {
@@ -619,6 +628,7 @@ mod tests {
             include_str!("../ui/widgets.rs"),
             include_str!("../ui/i18n/fr.toml"),
             include_str!("../ui/i18n/de.toml"),
+            include_str!("../ui/i18n/es.toml"),
         ];
         let ctx = egui::Context::default();
         let mut out = ctx.run_ui(egui::RawInput::default(), |_| {});

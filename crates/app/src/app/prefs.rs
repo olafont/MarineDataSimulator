@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 use super::SimApp;
 use crate::ui::form::form;
 use crate::ui::i18n::{self, Lang};
-use crate::ui::theme::{self, Palette};
+use crate::ui::theme::{self, FontWeight, Palette};
 use crate::t;
 
 /// The folder that holds the app's settings files, if the system has one.
@@ -29,6 +29,8 @@ pub(super) struct Prefs {
     pub palette: Option<Palette>,
     /// The interface's language; `None` follows the system's.
     pub language: Option<Lang>,
+    /// How heavy the interface's text is.
+    pub font_weight: FontWeight,
     /// Where recordings and file outputs go, and where logs to replay are looked for.
     pub output_folder: PathBuf,
     /// Serve the Model Context Protocol to AI agents on this computer (off unless asked for).
@@ -40,7 +42,7 @@ pub(super) struct Prefs {
 
 impl Default for Prefs {
     fn default() -> Self {
-        Self { palette: None, language: None, output_folder: default_output_folder(), mcp_enabled: false, mcp_port: mcp::DEFAULT_PORT, scenarios: vec![] }
+        Self { palette: None, language: None, font_weight: FontWeight::default(), output_folder: default_output_folder(), mcp_enabled: false, mcp_port: mcp::DEFAULT_PORT, scenarios: vec![] }
     }
 }
 
@@ -97,6 +99,7 @@ impl PrefsState {
     /// Applies the preferences that live in egui (the palette).
     pub(super) fn apply(&self, ctx: &Context) {
         i18n::set_lang(self.prefs.language.unwrap_or_else(Lang::system));
+        theme::set_font_weight(ctx, self.prefs.font_weight);
         if let Some(p) = self.prefs.palette {
             theme::set_palette(ctx, p);
         }
@@ -182,6 +185,20 @@ impl SimApp {
                 i18n::set_lang(lang);
                 p.language = Some(lang);
             }
+            let weights: Vec<(FontWeight, &str)> = FontWeight::ALL
+                .iter()
+                .map(|&w| {
+                    let label = match w {
+                        FontWeight::Light => t!("Light"),
+                        FontWeight::Regular => t!("Regular"),
+                        FontWeight::Medium => t!("Medium"),
+                    };
+                    (w, label)
+                })
+                .collect();
+            if f.segmented(t!("Text weight"), &mut p.font_weight, &weights) {
+                theme::set_font_weight(&ctx, p.font_weight);
+            }
         });
         ui.add_space(t.space_lg);
         ui.separator();
@@ -241,7 +258,7 @@ mod tests {
         let dir = std::env::temp_dir().join(format!("marine-sim-prefs-{}", std::process::id()));
         let path = dir.join("preferences.toml");
         assert_eq!(read(&path).unwrap(), Prefs::default(), "no file: defaults");
-        let p = Prefs { palette: Some(Palette::Night), language: Some(Lang::French), output_folder: dir.join("logs"), mcp_enabled: true, mcp_port: 12000, scenarios: vec![dir.join("my boat.toml")] };
+        let p = Prefs { palette: Some(Palette::Night), language: Some(Lang::French), font_weight: FontWeight::Medium, output_folder: dir.join("logs"), mcp_enabled: true, mcp_port: 12000, scenarios: vec![dir.join("my boat.toml")] };
         write(&path, &p).unwrap();
         assert_eq!(read(&path).unwrap(), p);
         // A file from an older version, with fewer fields, still reads.
@@ -252,6 +269,7 @@ mod tests {
         assert!(!old.mcp_enabled, "the MCP server is off unless asked for");
         assert_eq!(old.mcp_port, mcp::DEFAULT_PORT);
         assert!(old.scenarios.is_empty());
+        assert_eq!(old.font_weight, FontWeight::Regular);
         std::fs::remove_dir_all(dir).unwrap();
     }
 }

@@ -368,9 +368,44 @@ impl Tokens {
 /// Installs the tokens into egui's dark and light styles (Dusk and Day). Call once at start;
 /// [`set_palette`] then switches between Day, Dusk and Night.
 pub fn apply(ctx: &Context) {
+    set_font_weight(ctx, FontWeight::default());
     for (theme, t) in [(Theme::Dark, &DUSK), (Theme::Light, &DAY)] {
         ctx.style_mut_of(theme, |s| install(s, t));
     }
+}
+
+/// How heavy the interface's text is: three weights of the same Ubuntu letters.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, serde::Serialize, serde::Deserialize)]
+pub enum FontWeight {
+    /// egui's own font.
+    Light,
+    #[default]
+    Regular,
+    Medium,
+}
+
+impl FontWeight {
+    pub const ALL: [FontWeight; 3] = [FontWeight::Light, FontWeight::Regular, FontWeight::Medium];
+
+    /// The bundled font file, or `None` for egui's own Ubuntu Light.
+    fn font(self) -> Option<(&'static str, &'static [u8])> {
+        match self {
+            FontWeight::Light => None,
+            FontWeight::Regular => Some(("Ubuntu-Regular", include_bytes!("../../../../assets/fonts/Ubuntu-Regular.ttf"))),
+            FontWeight::Medium => Some(("Ubuntu-Medium", include_bytes!("../../../../assets/fonts/Ubuntu-Medium.ttf"))),
+        }
+    }
+}
+
+/// Sets the text in the given weight. egui's own fonts stay behind it for symbols and emoji;
+/// monospaced text keeps egui's Hack.
+pub fn set_font_weight(ctx: &Context, weight: FontWeight) {
+    let mut fonts = egui::FontDefinitions::default();
+    if let Some((name, bytes)) = weight.font() {
+        fonts.font_data.insert(name.into(), std::sync::Arc::new(egui::FontData::from_static(bytes)));
+        fonts.families.entry(FontFamily::Proportional).or_default().insert(0, name.into());
+    }
+    ctx.set_fonts(fonts);
 }
 
 fn install(s: &mut Style, t: &Tokens) {

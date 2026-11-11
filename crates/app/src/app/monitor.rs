@@ -85,7 +85,10 @@ impl SimApp {
         for l in &lines[start..] {
             routes.entry(l.tag.as_str()).or_insert_with(|| self.engine.outputs().accepting(l.format, &l.tag));
         }
-        let row_h = ui.text_style_height(&egui::TextStyle::Monospace);
+        // Each row is a horizontal layout, which is at least `interact_size.y` tall. show_rows
+        // must be given that real height: a smaller one makes the content taller than declared,
+        // and sticking to the bottom then jitters every frame (seen when the traffic stops).
+        let row_h = ui.text_style_height(&egui::TextStyle::Monospace).max(ui.spacing().interact_size.y);
         ScrollArea::vertical()
             .stick_to_bottom(true)
             .auto_shrink([false, false])
