@@ -34,6 +34,11 @@ fn builtin_titles() -> &'static [(&'static str, String)] {
     })
 }
 
+/// How one of the user's scenario files is listed: its file name without `.toml`.
+fn scenario_file_title(path: &std::path::Path) -> String {
+    path.file_stem().map_or_else(|| path.display().to_string(), |s| s.to_string_lossy().into_owned())
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Tab {
     Home,
@@ -256,31 +261,62 @@ impl SimApp {
                 self.reset();
             }
         });
-        group(ui, t!("Built-in scenarios"), |ui| {
+        group(ui, t!("Scenarios"), |ui| {
             column(ui, |ui| {
                 ui.weak(t!("Scenario"));
-                // The loaded scenario, when it is an unchanged built-in one.
-                let current = builtin_titles()
+                // The loaded scenario: a built-in one, or one of the user's files.
+                let builtin = builtin_titles()
                     .iter()
                     .find(|(_, title)| self.scenario_path.is_none() && *title == self.scenario.name);
-                let mut chosen = None;
+                let saved = self.prefs.prefs.scenarios.clone();
+                let current_file = self.scenario_path.as_ref().filter(|p| saved.contains(p));
+                let selected = match (builtin, current_file) {
+                    (Some((_, title)), _) => title.clone(),
+                    (None, Some(p)) => scenario_file_title(p),
+                    (None, None) => t!("Choose…").to_string(),
+                };
+                let mut chosen_builtin = None;
+                let mut chosen_file = None;
                 ComboBox::from_id_salt("ribbon_builtin_scenario")
                     .width(tokens(ui).field_long)
-                    .selected_text(current.map_or(t!("Choose…"), |(_, title)| title.as_str()))
+                    .selected_text(selected)
                     .show_ui(ui, |ui| {
                         for (file, title) in builtin_titles() {
-                            let on = current.is_some_and(|(f, _)| f == file);
+                            let on = builtin.is_some_and(|(f, _)| f == file);
                             if ui.selectable_label(on, title).on_hover_text(*file).clicked() {
-                                chosen = Some(*file);
+                                chosen_builtin = Some(*file);
+                            }
+                        }
+                        if !saved.is_empty() {
+                            ui.separator();
+                            ui.weak(t!("My scenarios"));
+                            for path in &saved {
+                                let on = current_file == Some(path);
+                                let label = ui.selectable_label(on, scenario_file_title(path));
+                                if label.on_hover_text(path.display().to_string()).clicked() {
+                                    chosen_file = Some(path.clone());
+                                }
                             }
                         }
                     })
                     .response
-                    .on_hover_text(t!("Load a built-in scenario"));
-                if let Some(file) = chosen {
+                    .on_hover_text(t!("Load a built-in scenario or one of yours"));
+                if let Some(file) = chosen_builtin {
                     match scenario::builtin(file) {
                         Ok(s) => self.load(s, None),
                         Err(e) => self.fail(e),
+                    }
+                }
+                if let Some(path) = chosen_file {
+                    match scenario::Scenario::load(&path) {
+                        Ok(s) => self.load(s, Some(path)),
+                        Err(e) => {
+                            // A file that is gone leaves the list; one that does not load stays.
+                            if !path.is_file() {
+                                self.forget_scenario(&path);
+                            }
+                            self.fail(e);
+                        }
                     }
                 }
             });

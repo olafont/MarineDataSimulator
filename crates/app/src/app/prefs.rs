@@ -34,11 +34,13 @@ pub(super) struct Prefs {
     /// Serve the Model Context Protocol to AI agents on this computer (off unless asked for).
     pub mcp_enabled: bool,
     pub mcp_port: u16,
+    /// Scenario files saved or opened in the app, listed after the built-in ones.
+    pub scenarios: Vec<PathBuf>,
 }
 
 impl Default for Prefs {
     fn default() -> Self {
-        Self { palette: None, language: None, output_folder: default_output_folder(), mcp_enabled: false, mcp_port: mcp::DEFAULT_PORT }
+        Self { palette: None, language: None, output_folder: default_output_folder(), mcp_enabled: false, mcp_port: mcp::DEFAULT_PORT, scenarios: vec![] }
     }
 }
 
@@ -81,12 +83,15 @@ impl PrefsState {
     /// Reads the file; an unreadable one is reported and the defaults are used.
     pub(super) fn load() -> (Self, Option<String>) {
         let path = config_file("preferences.toml");
-        let (prefs, error) = match path.as_deref().map(read) {
+        let (mut prefs, error) = match path.as_deref().map(read) {
             Some(Ok(p)) => (p, None),
             Some(Err(e)) => (Prefs::default(), Some(crate::tf!("Could not read the preferences: {e}", e = format!("{e:#}")))),
             None => (Prefs::default(), None),
         };
-        (Self { path, saved: prefs.clone(), prefs, window_open: false }, error)
+        let saved = prefs.clone();
+        // Files deleted or moved since the last run leave the list (written on the first frame).
+        prefs.scenarios.retain(|p| p.is_file());
+        (Self { path, saved, prefs, window_open: false }, error)
     }
 
     /// Applies the preferences that live in egui (the palette).
@@ -102,6 +107,19 @@ impl SimApp {
     /// Where recordings and file outputs go.
     pub(super) fn output_folder(&self) -> PathBuf {
         self.prefs.prefs.output_folder.clone()
+    }
+
+    /// Adds a scenario file to the list in the Scenario tab, once.
+    pub(super) fn remember_scenario(&mut self, path: &Path) {
+        let list = &mut self.prefs.prefs.scenarios;
+        if !list.iter().any(|p| p == path) {
+            list.push(path.to_path_buf());
+        }
+    }
+
+    /// Takes a scenario file off that list.
+    pub(super) fn forget_scenario(&mut self, path: &Path) {
+        self.prefs.prefs.scenarios.retain(|p| p != path);
     }
 
     /// Picks up preferences changed elsewhere (the palette) and writes the file when anything
@@ -223,7 +241,7 @@ mod tests {
         let dir = std::env::temp_dir().join(format!("marine-sim-prefs-{}", std::process::id()));
         let path = dir.join("preferences.toml");
         assert_eq!(read(&path).unwrap(), Prefs::default(), "no file: defaults");
-        let p = Prefs { palette: Some(Palette::Night), language: Some(Lang::French), output_folder: dir.join("logs"), mcp_enabled: true, mcp_port: 12000 };
+        let p = Prefs { palette: Some(Palette::Night), language: Some(Lang::French), output_folder: dir.join("logs"), mcp_enabled: true, mcp_port: 12000, scenarios: vec![dir.join("my boat.toml")] };
         write(&path, &p).unwrap();
         assert_eq!(read(&path).unwrap(), p);
         // A file from an older version, with fewer fields, still reads.
@@ -233,6 +251,7 @@ mod tests {
         assert_eq!(old.output_folder, default_output_folder());
         assert!(!old.mcp_enabled, "the MCP server is off unless asked for");
         assert_eq!(old.mcp_port, mcp::DEFAULT_PORT);
+        assert!(old.scenarios.is_empty());
         std::fs::remove_dir_all(dir).unwrap();
     }
 }

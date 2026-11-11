@@ -157,7 +157,8 @@ how you test what your software does when the depth sounder lies.
 
 A **scenario** holds everything about a run: vessel, environment, sensors, AIS traffic and
 outputs. Everything you can do in the app can be written in a scenario file (TOML,
-[section 12](#12-scenario-files)), and **Save as…** writes the current state to one.
+[section 12](#12-scenario-files)), and **Save as…** writes the current state to one. Files you
+save or open are added to the **Scenario** list on the Scenario tab, under the built-in ones.
 
 Two things belong to this computer and not to the scenario: your preferences, and the outputs
 you add yourself ([section 10](#10-preferences-and-saved-settings)).
@@ -217,7 +218,7 @@ keep only the tabs; click any tab to show them again.
 | | Steering | **Heading**, **Wind angle**, **Route** |
 | | Propulsion | **Engine** on or off (sailing vessels only) |
 | **Scenario** | File | **Open…** a scenario file, **Save as…** the current state, **Reset** to the scenario's initial state |
-| | Built-in scenarios | **Scenario** list: *Strait of Gibraltar crossing*, *Cape Canaveral sailing loop*, *Marseille sailing loop*, *Channel crossing (motor, tidal)*, *Singapore Strait (motor)*, *Long Beach sailing loop*. Choosing one loads it. |
+| | Scenarios | **Scenario** list: the built-in *Strait of Gibraltar crossing*, *Cape Canaveral sailing loop*, *Marseille sailing loop*, *Channel crossing (motor, tidal)*, *Singapore Strait (motor)* and *Long Beach sailing loop*, then **My scenarios**: the files you saved with **Save as…** or opened with **Open…**, by file name. Choosing one loads it. A file that has been deleted or moved leaves the list. |
 | **Chart** | Route | **Add waypoints** by clicking the chart, **Clear route** |
 | | Display | **Seamarks** overlay on or off, **Clear track** |
 | **AIS traffic** | Add | The **Class** of new targets; add a **Target**, a **Collision** course target or **Random** traffic |

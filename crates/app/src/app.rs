@@ -138,7 +138,10 @@ impl SimApp {
     fn open_dialog(&mut self) {
         if let Some(path) = rfd::FileDialog::new().add_filter(t!("Scenario"), &["toml"]).pick_file() {
             match Scenario::load(&path) {
-                Ok(s) => self.load(s, Some(path)),
+                Ok(s) => {
+                    self.remember_scenario(&path);
+                    self.load(s, Some(path));
+                }
                 Err(e) => self.fail(e),
             }
         }
@@ -152,6 +155,7 @@ impl SimApp {
                 Ok(()) => {
                     self.engine.rebase(captured.clone());
                     self.scenario = captured;
+                    self.remember_scenario(&path);
                     self.scenario_path = Some(path);
                 }
                 Err(e) => self.fail(e),
