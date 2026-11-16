@@ -56,8 +56,9 @@ license texts): Ubuntu-Light (Ubuntu Font Licence 1.0), Hack (MIT; its Bitstream
 under the Bitstream Vera License), Noto Emoji (SIL Open Font License 1.1) and emoji-icon-font
 (MIT).
 
-The app also bundles Ubuntu Regular and Ubuntu Medium (© 2011 Canonical Ltd, Ubuntu Font
-Licence 1.0) for its text, kept in `assets/fonts/` with their licence text, `UFL.txt`.
+The app also bundles IBM Plex Sans (the variable font) and IBM Plex Mono Regular
+(© IBM Corp., SIL Open Font License 1.1, https://github.com/IBM/plex) for its text, kept in
+`assets/fonts/ibm-plex/` with their licence text, `OFL.txt`.
 
 ## Map data
 

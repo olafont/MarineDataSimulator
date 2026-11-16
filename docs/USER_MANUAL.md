@@ -182,7 +182,9 @@ you add yourself ([section 10](#10-preferences-and-saved-settings)).
 | Traffic monitor (bottom) | The latest lines sent, with their source and destinations |
 
 Drag the edge of a panel to resize it, and click a section's title to fold it away. The
-**View** tab hides or shows the side panels and the traffic monitor.
+**View** tab hides or shows the side panels and the traffic monitor. The **👁** at the right of
+**Navigation**, **AIS** and **Environment** shows or hides, on the chart, the route and track,
+the AIS targets, or the wind and current indicator.
 
 Most numbers in the panels can be changed in two ways: drag the value sideways, or click it
 and type.
@@ -197,11 +199,17 @@ buttons, so the ribbon's tabs need no row of their own. From left to right:
 - The ribbon's **tabs**.
 - The **status**: the scenario's name (or file name), the simulated date and time in UTC, and
   the number of lines sent per second. **PAUSED** and **AGROUND** join it when they apply.
+- **🔍 Search commands** finds any ribbon command by a few letters of its name (see below).
 - **⚙** opens Preferences; **⏶ / ⏷** hides or shows the ribbon.
 
 Drag empty space in the bar to move the window; double-click it to zoom. On **Windows and
 Linux** the system's title bar is kept, and the tabs and the status sit at the top of the
 ribbon.
+
+**Search commands** (**⌘K**, Ctrl+K on Windows and Linux) lists the ribbon's commands whose
+name, tab or hint contains what you type, with the tab and group each lives in. Pick one with
+the arrow keys and Enter, or click it. **Space** runs or pauses the simulation, unless you are
+typing in a field.
 
 Two things to know about the status:
 

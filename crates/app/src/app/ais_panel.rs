@@ -14,7 +14,7 @@ use engine::sim_core::{Channel, LatLon};
 use super::SimApp;
 use crate::ui::form::{Form, Width, form};
 use crate::map::MapAction;
-use crate::ui::section;
+use crate::ui::section_eye;
 use crate::ui::theme::tokens;
 use crate::t;
 use crate::ui::i18n::tr;
@@ -114,13 +114,15 @@ const NAMES: &[&str] = &[
 impl SimApp {
     pub(super) fn ais(&mut self, ui: &mut Ui, snap: &Snapshot) {
         let n = snap.sim.ais_targets.len();
-        section(ui, "ais", crate::tf!("AIS ({n} targets)", n = n), false, |ui| {
+        let mut shown = self.chart.show_targets;
+        section_eye(ui, "ais", crate::tf!("AIS ({n} targets)", n = n), false, &mut shown, |ui| {
             self.own_transponder(ui, snap);
             self.traffic_tools(ui, snap);
             ui.separator();
             self.target_list(ui, snap);
             self.target_editor(ui, snap);
         });
+        self.chart.show_targets = shown;
     }
 
     fn own_transponder(&mut self, ui: &mut Ui, snap: &Snapshot) {

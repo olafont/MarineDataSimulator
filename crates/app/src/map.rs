@@ -60,6 +60,10 @@ pub struct ChartView {
     track: VecDeque<LatLon>,
     /// Highlighted AIS target.
     pub selected_target: Option<u64>,
+    /// What the chart shows (the eyes of the left panel's sections).
+    pub show_route: bool,
+    pub show_targets: bool,
+    pub show_environment: bool,
 }
 
 fn http_options(sub: &str) -> HttpOptions {
@@ -94,6 +98,9 @@ impl ChartView {
             context_pos: None,
             track: VecDeque::new(),
             selected_target: None,
+            show_route: true,
+            show_targets: true,
+            show_environment: true,
         }
     }
 
@@ -126,6 +133,7 @@ impl ChartView {
 
         let track = &self.track;
         let add_waypoints = self.add_waypoints;
+        let (show_route, show_targets, show_environment) = (self.show_route, self.show_targets, self.show_environment);
         let context_pos = &mut self.context_pos;
         let selected = self.selected_target.and_then(|id| sim.ais_targets.iter().find(|t| t.id == id));
         let mut action = None;
@@ -141,9 +149,13 @@ impl ChartView {
                 // Dim the tiles (dusk, night); what is drawn on them stays bright.
                 painter.rect_filled(response.rect, 0.0, shade);
             }
-            draw_track(painter, projector, track);
-            draw_route(painter, projector, sim);
-            draw_targets(painter, projector, sim, selected.map(|t| t.id));
+            if show_route {
+                draw_track(painter, projector, track);
+                draw_route(painter, projector, sim);
+            }
+            if show_targets {
+                draw_targets(painter, projector, sim, selected.map(|t| t.id));
+            }
             draw_vessel(painter, projector, sim);
             if let Some(p) = replay_fix {
                 // Position from the log being replayed.
@@ -219,7 +231,9 @@ impl ChartView {
                     }
                 }
             });
-            draw_environment(painter, response.rect, sim);
+            if show_environment {
+                draw_environment(painter, response.rect, sim);
+            }
         });
 
         let rect = inner.response.rect;

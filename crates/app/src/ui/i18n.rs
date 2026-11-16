@@ -217,6 +217,7 @@ mod tests {
     const SOURCES: &[(&str, &str)] = &[
         ("app.rs", include_str!("../app.rs")),
         ("app/ais_panel.rs", include_str!("../app/ais_panel.rs")),
+        ("app/commands.rs", include_str!("../app/commands.rs")),
         ("app/controls.rs", include_str!("../app/controls.rs")),
         ("app/local_outputs.rs", include_str!("../app/local_outputs.rs")),
         ("app/monitor.rs", include_str!("../app/monitor.rs")),
@@ -228,6 +229,8 @@ mod tests {
         ("map.rs", include_str!("../map.rs")),
         ("ui/form.rs", include_str!("form.rs")),
         ("ui/ribbon.rs", include_str!("ribbon.rs")),
+        ("ui/mod.rs", include_str!("mod.rs")),
+        ("ui/search.rs", include_str!("search.rs")),
         ("ui/widgets.rs", include_str!("widgets.rs")),
     ];
 

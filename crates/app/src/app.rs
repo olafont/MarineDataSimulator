@@ -26,6 +26,7 @@ use crate::t;
 
 mod agents;
 mod ais_panel;
+mod commands;
 mod controls;
 mod local_outputs;
 mod monitor;
@@ -59,6 +60,8 @@ pub struct SimApp {
     ais: ais_panel::AisUi,
     ribbon: ribbon::State<ribbon_bar::Tab>,
     panels: ribbon_bar::Panels,
+    /// The command search (⌘K).
+    search: crate::ui::search::Search,
     /// Opens the Outputs section on the next frame (a ribbon command shows its editor there).
     reveal_outputs: bool,
     error: Option<String>,
@@ -110,6 +113,7 @@ impl SimApp {
             ais: ais_panel::AisUi::default(),
             ribbon: ribbon::State { tab: ribbon_bar::Tab::Home, collapsed: false },
             panels: ribbon_bar::Panels::default(),
+            search: Default::default(),
             reveal_outputs: false,
             error: prefs_error.or(scenario_error),
         };
@@ -239,6 +243,31 @@ impl SimApp {
                 self.engine.send(Command::SetSteering(Steering::Heading { heading: h.round() }));
             }
             other => self.handle_ais_action(snap, other),
+        }
+    }
+
+    /// Keys that work anywhere: Space runs or pauses (unless a field is being typed in), ⌘K
+    /// searches the commands.
+    fn shortcuts(&mut self, ctx: &egui::Context, snap: &Snapshot) {
+        if ctx.input_mut(|i| i.consume_shortcut(&commands::SEARCH_KEY)) {
+            self.search.focus = true;
+            self.ribbon.collapsed = false;
+        }
+        if !ctx.egui_wants_keyboard_input() && ctx.input_mut(|i| i.consume_key(egui::Modifiers::NONE, egui::Key::Space)) {
+            commands::Cmd::RunPause.run(self, snap, ctx);
+        }
+    }
+
+    /// The command search field, and the command picked in it run.
+    fn command_search(&mut self, ui: &mut Ui, snap: &Snapshot) {
+        let found = commands::search(&self.search.text, snap);
+        let hits: Vec<crate::ui::search::Hit<'_>> = found
+            .iter()
+            .map(|&c| crate::ui::search::Hit { icon: c.icon(snap), name: c.name(snap), place: c.place(), enabled: c.enabled(self, snap) })
+            .collect();
+        let key = ui.ctx().format_shortcut(&commands::SEARCH_KEY);
+        if let Some(i) = self.search.show(ui, &key, &hits) {
+            found[i].run(self, snap, ui.ctx());
         }
     }
 
@@ -393,6 +422,7 @@ impl eframe::App for SimApp {
             }
         });
 
+        self.shortcuts(ui.ctx(), &snap);
         if ui.ctx().input_mut(|i| i.consume_key(egui::Modifiers::COMMAND, egui::Key::Comma)) {
             self.prefs.window_open = true;
         }

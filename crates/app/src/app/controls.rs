@@ -11,14 +11,15 @@ use engine::sim_core::{Channel, Command, EnvParam, Propulsion, Steering};
 use super::{SimApp, SteerMode, steering_rows};
 use crate::ui::form::{Form, Num, form};
 use crate::ui::theme::{Tone, tokens};
-use crate::ui::section;
+use crate::ui::{section, section_eye};
 use crate::ui::widgets::{format_value, override_cells, quantity_drag};
 use crate::t;
 use crate::ui::i18n::tr;
 
 impl SimApp {
     pub(super) fn navigation(&mut self, ui: &mut Ui, snap: &Snapshot) {
-        section(ui, "navigation", t!("Navigation"), true, |ui| {
+        let mut shown = self.chart.show_route;
+        section_eye(ui, "navigation", t!("Navigation"), true, &mut shown, |ui| {
             let sim = &snap.sim;
             let mut mode = SteerMode::of(&sim.steering);
             let mut send = vec![];
@@ -54,6 +55,7 @@ impl SimApp {
             }
             ui.weak(t!("Right-click the chart to move the vessel or add waypoints."));
         });
+        self.chart.show_route = shown;
     }
 
     fn route_editor(&mut self, ui: &mut Ui, snap: &Snapshot) {
@@ -238,7 +240,8 @@ impl SimApp {
     }
 
     pub(super) fn environment(&mut self, ui: &mut Ui, snap: &Snapshot) {
-        section(ui, "environment", t!("Environment"), true, |ui| {
+        let mut shown = self.chart.show_environment;
+        section_eye(ui, "environment", t!("Environment"), true, &mut shown, |ui| {
             let t = tokens(ui);
             ui.weak(t!("Base values you set; the live column adds gusts, tide and soundings. Overrides here change how the vessel behaves."));
             Grid::new("env").num_columns(6).spacing([t.space_md, t.space_sm]).striped(true).show(ui, |ui| {
@@ -268,6 +271,7 @@ impl SimApp {
                 }
         });
             });
+        self.chart.show_environment = shown;
     }
 
     pub(super) fn instruments(&mut self, ui: &mut Ui, snap: &Snapshot) {

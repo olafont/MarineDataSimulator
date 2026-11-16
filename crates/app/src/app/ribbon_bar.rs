@@ -82,7 +82,11 @@ impl SimApp {
         ribbon::card(ui, |ui| {
             let mut state = self.ribbon;
             if !title_bar::integrated() {
-                ribbon::tabs(ui, &mut state, TABS, |ui| self.status(ui, snap));
+                ribbon::tabs(ui, &mut state, TABS, |ui| {
+                    self.command_search(ui, snap);
+                    ui.add_space(tokens(ui).space_md);
+                    self.status(ui, snap);
+                });
             }
             self.ribbon = state;
             if state.collapsed {
@@ -130,6 +134,9 @@ impl SimApp {
             if quick(ui, Icon::purple("⚙"), t!("Preferences (⌘,)")) {
                 self.prefs.window_open = true;
             }
+            ui.add_space(t.space_sm);
+            self.command_search(ui, snap);
+            ui.add_space(t.space_md);
             ui.add_space(t.space_md);
             self.status(ui, snap);
         });
@@ -620,6 +627,7 @@ mod tests {
         let src = [
             include_str!("../app.rs"),
             include_str!("ais_panel.rs"),
+            include_str!("commands.rs"),
             include_str!("controls.rs"),
             include_str!("monitor.rs"),
             include_str!("local_outputs.rs"),
@@ -631,6 +639,8 @@ mod tests {
             include_str!("../map.rs"),
             include_str!("../ui/form.rs"),
             include_str!("../ui/ribbon.rs"),
+            include_str!("../ui/mod.rs"),
+            include_str!("../ui/search.rs"),
             include_str!("../ui/widgets.rs"),
             include_str!("../ui/i18n/fr.toml"),
             include_str!("../ui/i18n/de.toml"),

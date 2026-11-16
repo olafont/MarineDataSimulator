@@ -374,10 +374,12 @@ pub fn apply(ctx: &Context) {
     }
 }
 
-/// How heavy the interface's text is: three weights of the same Ubuntu letters.
+const PLEX_SANS: &[u8] = include_bytes!("../../../../assets/fonts/ibm-plex/IBMPlexSans-Variable.ttf");
+const PLEX_MONO: &[u8] = include_bytes!("../../../../assets/fonts/ibm-plex/IBMPlexMono-Regular.ttf");
+
+/// How heavy the interface's text is: three weights of IBM Plex Sans, cut from its variable font.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, serde::Serialize, serde::Deserialize)]
 pub enum FontWeight {
-    /// egui's own font.
     Light,
     #[default]
     Regular,
@@ -387,24 +389,27 @@ pub enum FontWeight {
 impl FontWeight {
     pub const ALL: [FontWeight; 3] = [FontWeight::Light, FontWeight::Regular, FontWeight::Medium];
 
-    /// The bundled font file, or `None` for egui's own Ubuntu Light.
-    fn font(self) -> Option<(&'static str, &'static [u8])> {
+    /// The `wght` axis of the variable font.
+    fn axis(self) -> f32 {
         match self {
-            FontWeight::Light => None,
-            FontWeight::Regular => Some(("Ubuntu-Regular", include_bytes!("../../../../assets/fonts/Ubuntu-Regular.ttf"))),
-            FontWeight::Medium => Some(("Ubuntu-Medium", include_bytes!("../../../../assets/fonts/Ubuntu-Medium.ttf"))),
+            FontWeight::Light => 300.0,
+            FontWeight::Regular => 400.0,
+            FontWeight::Medium => 500.0,
         }
     }
 }
 
-/// Sets the text in the given weight. egui's own fonts stay behind it for symbols and emoji;
-/// monospaced text keeps egui's Hack.
+/// Sets the text in IBM Plex Sans, in the given weight, and monospaced text in IBM Plex Mono.
+/// egui's own fonts stay behind them for symbols and emoji.
 pub fn set_font_weight(ctx: &Context, weight: FontWeight) {
+    use egui::epaint::text::{FontTweak, VariationCoords};
     let mut fonts = egui::FontDefinitions::default();
-    if let Some((name, bytes)) = weight.font() {
-        fonts.font_data.insert(name.into(), std::sync::Arc::new(egui::FontData::from_static(bytes)));
-        fonts.families.entry(FontFamily::Proportional).or_default().insert(0, name.into());
-    }
+    let tweak = FontTweak { coords: VariationCoords::new([(b"wght", weight.axis())]), ..Default::default() };
+    let sans = egui::FontData::from_static(PLEX_SANS).tweak(tweak);
+    fonts.font_data.insert("plex-sans".into(), std::sync::Arc::new(sans));
+    fonts.families.entry(FontFamily::Proportional).or_default().insert(0, "plex-sans".into());
+    fonts.font_data.insert("plex-mono".into(), std::sync::Arc::new(egui::FontData::from_static(PLEX_MONO)));
+    fonts.families.entry(FontFamily::Monospace).or_default().insert(0, "plex-mono".into());
     ctx.set_fonts(fonts);
 }
 
