@@ -5,8 +5,16 @@
 #   scripts/build-macos-app.sh --universal  # Apple Silicon + Intel in one app
 #   scripts/build-macos-app.sh --no-dmg     # skip the disk image
 #
-# The app is signed ad hoc (no Apple Developer ID): it runs on this Mac, and on other Macs
-# after "Open Anyway" in System Settings the first time (see docs/USER_MANUAL.md, "Install").
+# Signing, from the environment:
+#
+# - MACOS_SIGN_IDENTITY unset: the app is signed ad hoc. It runs on this Mac, and on other Macs
+#   after "Open Anyway" in System Settings the first time (see docs/USER_MANUAL.md, "Install").
+# - MACOS_SIGN_IDENTITY set (e.g. "Developer ID Application: Name (TEAMID)"): the app and the
+#   disk image are signed with it, with the hardened runtime and a secure timestamp.
+# - Also notarized and stapled (the disk image, so other Macs open it without a warning) when
+#   either MACOS_NOTARY_PROFILE names credentials saved with `xcrun notarytool store-credentials`,
+#   or MACOS_NOTARY_APPLE_ID, MACOS_NOTARY_PASSWORD (an app-specific password) and
+#   MACOS_NOTARY_TEAM_ID are set.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -83,10 +91,18 @@ plutil -lint "$APP/Contents/Info.plist" >/dev/null
 # The licence and the notices travel with the app (GPL-3.0 section 4).
 cp LICENSE THIRD_PARTY_NOTICES.md "$APP/Contents/Resources/"
 
-# 4. Sign ad hoc (required on Apple Silicon; seals the bundle).
-codesign --force --sign - --timestamp=none "$APP"
+# 4. Sign: with a Developer ID when one is given, else ad hoc (required on Apple Silicon; seals
+# the bundle).
+IDENTITY="${MACOS_SIGN_IDENTITY:-}"
+if [ -n "$IDENTITY" ]; then
+  codesign --force --options runtime --timestamp --sign "$IDENTITY" "$APP"
+  SIGNED="signed by $IDENTITY"
+else
+  codesign --force --sign - --timestamp=none "$APP"
+  SIGNED="signed ad hoc"
+fi
 codesign --verify --strict "$APP"
-echo "built $APP ($ARCH, version $VERSION)"
+echo "built $APP ($ARCH, version $VERSION, $SIGNED)"
 
 # 5. Disk image with an Applications shortcut.
 if [ "$DMG" = 1 ]; then
@@ -99,4 +115,32 @@ if [ "$DMG" = 1 ]; then
   rm -f "$DMG_PATH"
   hdiutil create -quiet -volname "$NAME" -srcfolder "$STAGE" -fs HFS+ -format UDZO "$DMG_PATH"
   echo "built $DMG_PATH"
+
+  # 6. Sign, notarize and staple the disk image.
+  if [ -n "$IDENTITY" ]; then
+    codesign --force --timestamp --sign "$IDENTITY" "$DMG_PATH"
+    NOTARY=()
+    if [ -n "${MACOS_NOTARY_PROFILE:-}" ]; then
+      NOTARY=(--keychain-profile "$MACOS_NOTARY_PROFILE")
+    elif [ -n "${MACOS_NOTARY_APPLE_ID:-}" ] && [ -n "${MACOS_NOTARY_PASSWORD:-}" ] && [ -n "${MACOS_NOTARY_TEAM_ID:-}" ]; then
+      NOTARY=(--apple-id "$MACOS_NOTARY_APPLE_ID" --password "$MACOS_NOTARY_PASSWORD" --team-id "$MACOS_NOTARY_TEAM_ID")
+    fi
+    if [ ${#NOTARY[@]} -gt 0 ]; then
+      echo "notarizing $DMG_PATH (a few minutes)…"
+      RESULT=$(xcrun notarytool submit "$DMG_PATH" "${NOTARY[@]}" --wait 2>&1) || true
+      echo "$RESULT"
+      if ! grep -q "status: Accepted" <<<"$RESULT"; then
+        # Apple's log says what it rejected.
+        ID=$(sed -n 's/^ *id: //p' <<<"$RESULT" | head -1)
+        [ -n "$ID" ] && xcrun notarytool log "$ID" "${NOTARY[@]}" || true
+        echo "notarization failed" >&2
+        exit 1
+      fi
+      xcrun stapler staple "$DMG_PATH"
+      spctl --assess --type open --context context:primary-signature -vv "$DMG_PATH"
+      echo "notarized $DMG_PATH"
+    else
+      echo "not notarized: no notarization credentials given" >&2
+    fi
+  fi
 fi

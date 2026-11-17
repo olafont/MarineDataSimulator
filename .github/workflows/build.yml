@@ -57,12 +57,49 @@ jobs:
           if [ "$RUNNER_OS" = Windows ]; then 7z a "$DIR.zip" "$DIR" >/dev/null; else tar czf "$DIR.tar.gz" "$DIR"; fi
           rm -rf "$DIR"
 
-      # Universal "Marine Data Simulator.app" in a DMG.
+      # Developer ID certificate into a throwaway keychain, when the repository has the secrets:
+      # MACOS_CERTIFICATE (the .p12 exported from Keychain Access, base64) and
+      # MACOS_CERTIFICATE_PASSWORD. Without them the app is signed ad hoc, as before.
+      - name: Import signing certificate (macOS)
+        if: runner.os == 'macOS'
+        env:
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+        run: |
+          if [ -z "$MACOS_CERTIFICATE" ]; then
+            echo "::warning::no MACOS_CERTIFICATE secret: the app will be signed ad hoc, not notarized"
+            exit 0
+          fi
+          KC="$RUNNER_TEMP/signing.keychain-db"
+          KC_PASS=$(openssl rand -hex 16)
+          echo "$MACOS_CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security create-keychain -p "$KC_PASS" "$KC"
+          security set-keychain-settings -lut 3600 "$KC"
+          security unlock-keychain -p "$KC_PASS" "$KC"
+          security import "$RUNNER_TEMP/cert.p12" -k "$KC" -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KC_PASS" "$KC" >/dev/null
+          security list-keychains -d user -s "$KC" $(security list-keychains -d user | tr -d '"')
+          rm "$RUNNER_TEMP/cert.p12"
+          IDENTITY=$(security find-identity -v -p codesigning "$KC" | sed -n 's/.*"\(Developer ID Application: .*\)"/\1/p' | head -1)
+          [ -n "$IDENTITY" ] || { echo "::error::no Developer ID Application identity in the certificate"; exit 1; }
+          echo "MACOS_SIGN_IDENTITY=$IDENTITY" >> "$GITHUB_ENV"
+          # The team ID is the identity's last part, in parentheses.
+          echo "MACOS_NOTARY_TEAM_ID=$(sed -n 's/.*(\([A-Z0-9]*\))$/\1/p' <<<"$IDENTITY")" >> "$GITHUB_ENV"
+
+      # Universal "Marine Data Simulator.app" in a DMG, notarized when MACOS_NOTARY_APPLE_ID and
+      # MACOS_NOTARY_PASSWORD (an app-specific password) are also set.
       - name: Build and package (macOS)
         if: runner.os == 'macOS'
+        env:
+          MACOS_NOTARY_APPLE_ID: ${{ secrets.MACOS_NOTARY_APPLE_ID }}
+          MACOS_NOTARY_PASSWORD: ${{ secrets.MACOS_NOTARY_PASSWORD }}
         run: |
           scripts/build-macos-app.sh --universal
           mkdir -p dist && cp target/macos/*.dmg dist/
+
+      - name: Remove signing keychain (macOS)
+        if: always() && runner.os == 'macOS'
+        run: security delete-keychain "$RUNNER_TEMP/signing.keychain-db" 2>/dev/null || true
 
       - uses: actions/upload-artifact@v4
         with:
