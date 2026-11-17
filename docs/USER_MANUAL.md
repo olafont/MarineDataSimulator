@@ -40,13 +40,13 @@ also speaks French, German and Spanish ([section 10](#10-preferences-and-saved-s
 
 ### Install
 
-Latest release, **[v0.1.4](https://github.com/olafont/MarineDataSimulator/releases/latest)**:
+Latest release, **[v0.1.5](https://github.com/olafont/MarineDataSimulator/releases/latest)**:
 
-- **macOS** (Apple Silicon and Intel): [MarineDataSimulator-0.1.4-macos-universal.dmg](https://github.com/olafont/MarineDataSimulator/releases/download/v0.1.4/MarineDataSimulator-0.1.4-macos-universal.dmg).
+- **macOS** (Apple Silicon and Intel): [MarineDataSimulator-0.1.5-macos-universal.dmg](https://github.com/olafont/MarineDataSimulator/releases/download/v0.1.5/MarineDataSimulator-0.1.5-macos-universal.dmg).
   Open it and drag the app to Applications.
-- **Windows** (x86-64): [marine-data-simulator-0.1.4-windows-x86_64.zip](https://github.com/olafont/MarineDataSimulator/releases/download/v0.1.4/marine-data-simulator-0.1.4-windows-x86_64.zip).
+- **Windows** (x86-64): [marine-data-simulator-0.1.5-windows-x86_64.zip](https://github.com/olafont/MarineDataSimulator/releases/download/v0.1.5/marine-data-simulator-0.1.5-windows-x86_64.zip).
   Unzip it and run `marine-sim.exe`.
-- **Linux** (x86-64): [marine-data-simulator-0.1.4-linux-x86_64.tar.gz](https://github.com/olafont/MarineDataSimulator/releases/download/v0.1.4/marine-data-simulator-0.1.4-linux-x86_64.tar.gz).
+- **Linux** (x86-64): [marine-data-simulator-0.1.5-linux-x86_64.tar.gz](https://github.com/olafont/MarineDataSimulator/releases/download/v0.1.5/marine-data-simulator-0.1.5-linux-x86_64.tar.gz).
   Unpack it and run `marine-sim`.
 
 On first launch:

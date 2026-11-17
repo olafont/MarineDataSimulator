@@ -32,11 +32,11 @@ services. See [Safety and responsible use](#safety-and-responsible-use).
 
 ## Download
 
-Latest release, **[v0.1.4](https://github.com/olafont/MarineDataSimulator/releases/latest)**:
+Latest release, **[v0.1.5](https://github.com/olafont/MarineDataSimulator/releases/latest)**:
 
-- **macOS** (Apple Silicon and Intel): [MarineDataSimulator-0.1.4-macos-universal.dmg](https://github.com/olafont/MarineDataSimulator/releases/download/v0.1.4/MarineDataSimulator-0.1.4-macos-universal.dmg)
-- **Windows** (x86-64): [marine-data-simulator-0.1.4-windows-x86_64.zip](https://github.com/olafont/MarineDataSimulator/releases/download/v0.1.4/marine-data-simulator-0.1.4-windows-x86_64.zip)
-- **Linux** (x86-64): [marine-data-simulator-0.1.4-linux-x86_64.tar.gz](https://github.com/olafont/MarineDataSimulator/releases/download/v0.1.4/marine-data-simulator-0.1.4-linux-x86_64.tar.gz)
+- **macOS** (Apple Silicon and Intel): [MarineDataSimulator-0.1.5-macos-universal.dmg](https://github.com/olafont/MarineDataSimulator/releases/download/v0.1.5/MarineDataSimulator-0.1.5-macos-universal.dmg)
+- **Windows** (x86-64): [marine-data-simulator-0.1.5-windows-x86_64.zip](https://github.com/olafont/MarineDataSimulator/releases/download/v0.1.5/marine-data-simulator-0.1.5-windows-x86_64.zip)
+- **Linux** (x86-64): [marine-data-simulator-0.1.5-linux-x86_64.tar.gz](https://github.com/olafont/MarineDataSimulator/releases/download/v0.1.5/marine-data-simulator-0.1.5-linux-x86_64.tar.gz)
 
 The macOS app is signed and notarized by Apple and opens without a warning. The Windows and Linux
 builds are not signed: on Windows, choose **More info → Run anyway** on first launch.
