@@ -49,15 +49,12 @@ Latest release, **[v0.1.4](https://github.com/olafont/MarineDataSimulator/releas
 - **Linux** (x86-64): [marine-data-simulator-0.1.4-linux-x86_64.tar.gz](https://github.com/olafont/MarineDataSimulator/releases/download/v0.1.4/marine-data-simulator-0.1.4-linux-x86_64.tar.gz).
   Unpack it and run `marine-sim`.
 
-The builds are not signed, so the system warns on first launch:
+On first launch:
 
-- **macOS:** open the app and click **Done** when macOS says it cannot verify the developer.
-  Then go to **System Settings → Privacy & Security**, click **Open Anyway** next to
-  *Marine Data Simulator* and confirm. Or, from a terminal:
-  `xattr -dr com.apple.quarantine "/Applications/Marine Data Simulator.app"`.
-  If macOS asks whether the app may accept incoming network connections, allow it so that
-  other computers can reach its TCP or WebSocket outputs.
-- **Windows:** choose **More info → Run anyway**.
+- **macOS:** the app is signed and notarized by Apple, so it opens like any other app. If macOS
+  asks whether the app may accept incoming network connections, allow it so that other
+  computers can reach its TCP or WebSocket outputs.
+- **Windows:** the build is not signed, so Windows warns: choose **More info → Run anyway**.
 
 To build from source, see the [README](../README.md#quick-start). The macOS app and disk image
 are built by `scripts/build-macos-app.sh` (add `--universal` for Apple Silicon and Intel). To start

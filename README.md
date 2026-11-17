@@ -38,8 +38,8 @@ Latest release, **[v0.1.4](https://github.com/olafont/MarineDataSimulator/releas
 - **Windows** (x86-64): [marine-data-simulator-0.1.4-windows-x86_64.zip](https://github.com/olafont/MarineDataSimulator/releases/download/v0.1.4/marine-data-simulator-0.1.4-windows-x86_64.zip)
 - **Linux** (x86-64): [marine-data-simulator-0.1.4-linux-x86_64.tar.gz](https://github.com/olafont/MarineDataSimulator/releases/download/v0.1.4/marine-data-simulator-0.1.4-linux-x86_64.tar.gz)
 
-The builds are not signed, so the system warns on first launch: on macOS see
-[the manual](docs/USER_MANUAL.md#install), on Windows choose **More info → Run anyway**.
+The macOS app is signed and notarized by Apple and opens without a warning. The Windows and Linux
+builds are not signed: on Windows, choose **More info → Run anyway** on first launch.
 To build from source, see [Quick start](#quick-start).
 
 ## Quick start
